@@ -29,8 +29,8 @@ noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus ap
 ncomp_pca = 1 # Number of principal components for PCA
 
 ## Do you want to see the image?
-see_cube = True
-see_collapsed_cube = True
+see_cube = True # Original cube
+see_collapsed_cube = True # Collapsed cube
 
 
 
