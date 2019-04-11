@@ -11,6 +11,11 @@ reduced with VIP. Astrophysics Source Code Library reference [ascl:1603.003]
 Introduction
 -------------
 
+SHIPS is a high-contrast imaging pipeline specialising in the study of massive stars. It includes all necessary routines to fully analyse high-contrast imaging frames taken with SPHERE: it enables the detection and position of potential companion candidates and their spectrum extraction.
+
+SHIPS bridges the gaps between two essential high-contrast imaging codes: VIP<https://github.com/carlgogo/vip-tutorial>  and pyKLIP
+
+
 VIP is a package/pipeline for angular, reference star and spectral
 differential imaging for exoplanet/disk detection through high-contrast imaging.
 VIP is being developed in Python 2.7.
