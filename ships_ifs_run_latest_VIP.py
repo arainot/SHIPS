@@ -1,8 +1,8 @@
 ############################
-# Date: 09/04/2019
+# Date: 06/08/2019
 # Title: Running script for SHIPS for IFS data
 # Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
-# VIP version: 0.9.8 (Rainot edit.)
+# VIP version: 0.9.9 (Rainot edit.)
 # pyKLIP version: 1.1 NOT IMPLEMENTED YET
 ############################
 
@@ -28,6 +28,12 @@ ncomp_pca = 1 # Number of principal components for PCA
 ## Do you want to see the image?
 see_cube = False # Original cube
 see_collapsed_cube = False # Collapsed cube
+see_psf_norm = False # Normalised PSF
+see_cube_centre = False # Check if the image is centered correctly
+
+## SNR maps
+snr_maps = True # Would you like to make and save an SNR map to disk? !! computationally intensive !!
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Contrast curves
 contrast_curves = False # True or False
@@ -43,8 +49,6 @@ n_branches = 1 # Number of branches for contrast curves
 ## Load libraries
 import __init__
 import matplotlib
-matplotlib.use('PS')
-from matplotlib.pyplot import *
 import vip_hci
 from hciplot import plot_frames, plot_cubes
 from vip_hci.metrics.fakecomp import cube_inject_companions, frame_inject_companion, normalize_psf
@@ -86,7 +90,14 @@ if see_cube == True:
     ds9 = vip_hci.Ds9Window()
     ds9.display(cube[0,0])
 
-psf_norm, flux, fwhm = vip_hci.metrics.normalize_psf(psf,fwhm='fit',full_output=True)
+## Get FWHM of images & normalised PSF
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf,fwhm='fit',verbose=False,full_output=True) # maxflux is a dummy variable
+if see_psf_norm == True:
+    plot_frames(psf_norm[0], grid=True, size_factor=4)
+
+## Check if the cube is centred correctly
+if see_cube_centre == True:
+    plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
 
 
 # Stellar photometry of the companion
@@ -131,6 +142,11 @@ for i in range(0,wl.shape[0]):
     bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
     bkg_sum = bkg_mean * aper_comp.area()
     final_sum[i] = phot['aperture_sum'] - bkg_sum
+
+## SNR maps
+if snr_maps == True:
+    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=4, plot=True)
+    vip_hci.fits.write_fits(snr_map_file,snrmap)
 
 ## Contrast curve
 if contrast_curves == True:
