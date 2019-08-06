@@ -150,6 +150,11 @@ for i in range(0,wl.shape[0]):
     bkg_sum = bkg_mean * aper_comp.area()
     final_sum[i] = phot['aperture_sum'] - bkg_sum
 
+### Scaling the PSF for normalisation -- SHOULD I JUST TAKE PSF_NORM INSTEAD?
+psf_scaled = np.zeros_like(psf)
+for i in range (0,len(psf)):
+    psf_scaled[i] = psf[i]/psf_final_sum[i]
+
 ## SNR maps
 if snr_maps == True:
     snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=True)
@@ -181,7 +186,7 @@ if extract_spec == True:
     ## Start Simplex
     for i in range(0,len(wl)):
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
-        simplex_guess = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
+        simplex_guess = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp_pca,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
 
 ## Save the spectrum
 if save_spec == True:
