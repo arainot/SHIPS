@@ -22,6 +22,9 @@ position_angle = 159.37210826761003  # Position angle of companion in degrees
 noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 
+## Computing power
+ncores = 4 # Number of cores you are willing to share for the computation
+
 ## PCA
 ncomp_pca = 1 # Number of principal components for PCA
 
@@ -32,13 +35,17 @@ see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
 
 ## SNR maps
-snr_maps = True # Would you like to make and save an SNR map to disk? !! computationally intensive !!
+snr_maps = False # Would you like to make and save an SNR map to disk?
 snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Contrast curves
-contrast_curves = False # True or False
+contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
+## Spectrum extraction
+extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+save_spec = True # Save the spectrum to ascii file
+sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 
 # ---------------------------------------------------------------------------
 
@@ -72,7 +79,6 @@ Ro = 6.957e8 # Solar Radius
 sr2pc = 44334448.0068964 # Convert steraradians to parsec
 pxscale = 0.0074 # IFS pixel scale in arcsec/pixel
 PA = position_angle + 90 # Correct for VIP unconventional rotation axis
-rad_dists = [radial_dist] # Convert radial distance float to array, otherwise negfc won't work
 
 ## Open image files
 cube = vip_hci.fits.open_fits(cube_filepath)
@@ -91,11 +97,12 @@ if see_cube == True:
     ds9.display(cube[0,0])
 
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf,fwhm='fit',verbose=False,full_output=True) # maxflux is a dummy variable
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=int(13), verbose=False,full_output=True) # maxflux is a dummy variable
+### Plot it
 if see_psf_norm == True:
     plot_frames(psf_norm[0], grid=True, size_factor=4)
 
-## Check if the cube is centred correctly
+## Check if the cube is centred correctly by plotting
 if see_cube_centre == True:
     plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
 
@@ -145,23 +152,37 @@ for i in range(0,wl.shape[0]):
 
 ## SNR maps
 if snr_maps == True:
-    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=4, plot=True)
-    vip_hci.fits.write_fits(snr_map_file,snrmap)
+    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=True)
+    vip_hci.fits.write_fits(snr_map_file,snrmap) # Write SNR maps to file
 
 ## Contrast curve
 if contrast_curves == True:
-    #Crop the PSF to match the size of companion
-    for i in range(psf.shape[0]):
-                psf_temp = vip_hci.metrics.normalize_psf(psf[i], size=int(13), fwhm=fwhm[i], verbose=False,full_output=True) #3*fwhm
-                if i==0:
-                    psf_crop = np.zeros((len(psf),psf_temp[0].shape[0],psf_temp[0].shape[1]))
-                psf_crop[i] = psf_temp
-    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_crop,-angs,flevel=-105,plsc=pxscale,rad_dists=rad_dists,theta=PA) # Remove companion using NEGFC technique
-
+    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=-105,plsc=pxscale,rad_dists=[radial_dist],theta=PA) # Remove companion using NEGFC technique
     print("Companion removed")
     print("Computing contrast curve...")
-    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf,4.,pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
+    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
 elif contrast_curves == False:
     print("No contrast curve")
+
+
+# Spectrum extraction
+if extract_spec == True:
+
+    ## Define some parameters
+    comp_xycoord = [[comp_pos[0],comp_pos[1]]] # Companion coords
+    f_guess_pl = 200. # Flux first guess
+    f_range = np.linspace(0.*f_guess_pl,10 *f_guess_pl,400)
+    p_in = np.array([radial_dist,PA]) # Regroup companion positions
+    simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
+    simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
+
+    ## Start Simplex
+    for i in range(0,len(wl)):
+        print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
+        simplex_guess = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
+
+## Save the spectrum
+if save_spec == True:
+    np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
