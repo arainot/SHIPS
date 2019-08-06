@@ -42,11 +42,15 @@ snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/SNRmap_VIP.f
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
-## Spectrum extraction
+## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 save_spec = True # Save the spectrum to ascii file
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 
+## Spectrum extraction with MCMC
+extract_mcmc = True # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
+source = 'QZCar' # Give name for your source
+outpath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/'.format(source) # Directory where MCMC results will be stored
 # ---------------------------------------------------------------------------
 
 # Running script (DO NOT MODIFY)
@@ -172,7 +176,7 @@ elif contrast_curves == False:
     print("No contrast curve")
 
 
-# Spectrum extraction
+# Spectrum extraction with NM
 if extract_spec == True:
 
     ## Define some parameters
@@ -191,3 +195,26 @@ if extract_spec == True:
 ## Save the spectrum
 if save_spec == True:
     np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
+
+# Spectrum extraction with MCMC
+if extract_mcmc == True:
+    instru= 'IFS36059'
+    ann_width=annulus_width
+    aperture_radius=aperture_width
+    fig_merit='sum'
+
+    print "########## MCMC Sampling starting... ##########"
+
+    nwalkers, itermin, itermax = (100,200,500) # as recommended by Oli W
+    for i in range(len(final_sum)):
+        initialState = simplex_guess[i]
+        bounds=[[0.75*initialState[0],1.25*initialState[0]],[0.75*initialState[1],1.25*initialState[1]],[0.75*initialState[2],1.30*initialState[2]]]
+        output_file = source+'_IFS_wavelength_{}'.format(i)
+
+        chain_40 = vip.negfc.mcmc_negfc_sampling(cube[i], -angs,  psf_scaled[i], ncomp_pca, pxscale, initialState, ann_width,
+                                                 aperture_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
+                                                 bounds=bounds, niteration_min=itermin,
+                                                 niteration_limit=itermax, check_maxgap=50, nproc= ncores,
+                                                 output_file=output_file, display=True,verbose=True, save=True,
+                                                 rhat_threshold=1.01, niteration_supp=0, fmerit=fig_merit)
+    print "########## MCMC Sampling done! ##########"
