@@ -4,6 +4,7 @@
 # Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
 # VIP version: 0.9.9 (Rainot edit.)
 # pyKLIP version: 1.1 NOT IMPLEMENTED YET
+# Python version: 3 ONLY
 ############################
 
 # Set up your parameters
