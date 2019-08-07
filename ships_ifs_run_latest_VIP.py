@@ -1,5 +1,5 @@
 ############################
-# Date: 06/08/2019
+# Date: 07/08/2019
 # Title: Running script for SHIPS for IFS data
 # Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
 # VIP version: 0.9.9 (Rainot edit.)
@@ -65,8 +65,11 @@ dist_fast = 100. # Distance to consider for the flux of the calibrated spectrum 
 
 ## Compute calibrated spectrum of companion
 calib_spec = False # Do you wish to calibrate the spectrum of the companion?
+save_calib_spec = False # Would you like to save the calibrated spectrum & associated error?
 calib_star_spec_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/fastwind/qzcar_fastwind_spec.txt' # Path to calibrated spectrum of central star
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Path to spectrum file
+cspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_calib_spectra.txt' # Path to calibrated spectrum
+
 # ---------------------------------------------------------------------------
 
 # Running script (DO NOT MODIFY)
@@ -335,13 +338,43 @@ if fastwind == True:
     ## Scale the flux to a distance of Ro
     flux_a1 = model_flux_a1/(dist_fast)**2 * (120*rad_fast)**2 #Use 100 Ro for distance to flux measurement
 
-    f = open("/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/qzcar_simplex_flux_final.txt",'r')
-
 # Companion spectrum calibration
 if calib_spec == True:
-    ## Define parameters
-    fcomp = np.array([])
-    for line in f:
-        line = line.strip()
-        columns = line.split()
-        fcomp = np.append(fcomp,float(columns[1]))
+    ## If spectrum file is specified, then read and store it
+    if sspec_file is not None:
+        simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
+        f = open(sspec_file,'r')
+        for line in f:
+            line = line.strip()
+            columns = line.split()
+            simplex_guess[:][0] = float(columns[0])
+            simplex_guess[:][1] = float(columns[1])
+            simplex_guess[:][2] = float(columns[2])
+        f.close()
+    ## Read calibrated spectrum and store it
+    if calib_star_spec_path is not None:
+        calib_spectrum = np.zeros_like(wl)
+        f = open(calib_star_spec_path,'r')
+        for line in f:
+            line = line.strip()
+            columns = line.split()
+            calib_spectrum = float(columns)
+        f.close()
+    ## Calculate the contrast spectrum of the companion
+    contr_spectra = np.zeros_like(wl)
+    contr_spectra_err = np.zeros_like(wl)
+    for i in range(0,len(wl)):
+        contr_spectra[i] = simplex_guess[i][2]/psf_final_sum[i] # Spectrum
+        contr_spectra_err[i] = (spectra_gauss_err[i]/simplex_guess[i][2])*(simplex_guess[i][2]/psf_final_sum[i]) # Error on contrast spectrum !! Requires prior MCMC reading !!
+
+    ## Calculate the calibrated companion spectrum
+    calib_comp_spec = contr_spectra * calib_spectrum
+    calib_comp_spec_err = calib_comp_spec * contr_spectra_err/contr_spectra
+
+    ## Save the calibrated spectrum with errors if requested
+    if save_calib_spec == True:
+        comp_spec = np.zeros((39,2))
+        for i in range(0,39):
+            comp_spec[i][0] = calib_comp_spec
+            comp_spec[i][1] = calib_comp_spec_err
+        np.savetxt(cspec_file, comp_spec, delimiter='   ')
