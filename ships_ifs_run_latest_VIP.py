@@ -48,9 +48,25 @@ save_spec = True # Save the spectrum to ascii file
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 
 ## Spectrum extraction with MCMC
-extract_mcmc = True # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
+extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
 source = 'QZCar' # Give name for your source
-outpath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/'.format(source) # Directory where MCMC results will be stored
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results will be stored
+
+## Reading MCMC results
+read_mcmc = False # Do you wish to read the MCMC results?
+source = 'QZCar' # Give name for your source
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results are stored
+
+## Load calibrated FASTWIND models of the central star
+fastwind = False # Use FASTWIND model spectra for the star
+fastwind_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/fastwind/qzcarAa1/' # Directory where the FASTWIND flux are
+rad_fast = 22.1 # Radius of model star
+dist_fast = 100. # Distance to consider for the flux of the calibrated spectrum in Ro
+
+## Compute calibrated spectrum of companion
+calib_spec = False # Do you wish to calibrate the spectrum of the companion?
+calib_star_spec_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/fastwind/qzcar_fastwind_spec.txt' # Path to calibrated spectrum of central star
+sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Path to spectrum file
 # ---------------------------------------------------------------------------
 
 # Running script (DO NOT MODIFY)
@@ -190,31 +206,142 @@ if extract_spec == True:
     ## Start Simplex
     for i in range(0,len(wl)):
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
-        simplex_guess = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp_pca,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
-
+        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp_pca,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
+        print(simplex_guess[i])
 ## Save the spectrum
 if save_spec == True:
     np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
 
 # Spectrum extraction with MCMC
 if extract_mcmc == True:
-    instru= 'IFS36059'
-    ann_width=annulus_width
-    aperture_radius=aperture_width
-    fig_merit='sum'
+    instru= 'IFS36059' # Define instrument parameters
+    ann_width=annulus_width # Annulus width of MCMC
+    aperture_radius=aperture_width # Aperture radius
+    fig_merit='sum' # Summation figure of merit
+    outpath = mcmc_path.format(source) # Path to save MCMC files
 
-    print "########## MCMC Sampling starting... ##########"
+    print("########## MCMC Sampling starting... ##########")
 
     nwalkers, itermin, itermax = (100,200,500) # as recommended by Oli W
-    for i in range(len(final_sum)):
-        initialState = simplex_guess[i]
-        bounds=[[0.75*initialState[0],1.25*initialState[0]],[0.75*initialState[1],1.25*initialState[1]],[0.75*initialState[2],1.30*initialState[2]]]
-        output_file = source+'_IFS_wavelength_{}'.format(i)
+    for i in range(len(final_sum)): # For each wavelength channel
+        initialState = simplex_guess[i] # Take r, PA and flux from simplex
+        bounds=[[0.75*initialState[0],1.25*initialState[0]],[0.75*initialState[1],1.25*initialState[1]],[0.75*initialState[2],1.30*initialState[2]]] # Initiate bounds
+        output_file = source+'_IFS_wavelength_{}'.format(i) # Save to output file
 
         chain_40 = vip.negfc.mcmc_negfc_sampling(cube[i], -angs,  psf_scaled[i], ncomp_pca, pxscale, initialState, ann_width,
                                                  aperture_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
                                                  bounds=bounds, niteration_min=itermin,
                                                  niteration_limit=itermax, check_maxgap=50, nproc= ncores,
                                                  output_file=output_file, display=True,verbose=True, save=True,
-                                                 rhat_threshold=1.01, niteration_supp=0, fmerit=fig_merit)
-    print "########## MCMC Sampling done! ##########"
+                                                 rhat_threshold=1.01, niteration_supp=0, fmerit=fig_merit) # MCMC run per channel
+    print("########## MCMC Sampling done! ##########")
+
+## Read MCMC files
+if read_mcmc == True:
+    import pickle # Import important MCMC libraries
+    from pickle import Pickler
+    pickler={}
+    mcmc_result={}
+    outpath = mcmc_path.format(source) # Path to save MCMC files
+    for i in range(0,len(wl)): # Read all channels and store them to variables
+        with open(outpath+source+'_IFS_wavelength_{}/MCMC_results'.format(i),'rb') as fi:
+                pickler["myPickler{}".format(i)] = pickle.Unpickler(fi)
+                mcmc_result["mcmc_result{}".format(i)] = pickler["myPickler{}".format(i)].load()
+
+    ## Create variable to store MCMC results
+    final_pos = []
+    final_PA = []
+    final_contr = []
+    final_pos_gauss = []
+    final_PA_gauss = []
+    final_contr_gauss = []
+
+    ## Obtain r, PA, flux and error values
+    for i in range(0,len(wl)):
+        mcmc = mcmc_result["mcmc_result{}".format(i)]
+        chain_40 = mcmc['chain']
+        index = np.where(mcmc['AR']>0.4)
+        print('Wavelength channel: ', i)
+
+        burnin = 0.8
+        chain_40_g = chain_40[index]
+
+        isamples_flat = chain_40_g[:,int(chain_40_g.shape[1]//(1/burnin)):,:].reshape((-1,3))
+        val_max,conf,mu,sigma = vip.negfc.mcmc_sampling.confidence(isamples_flat,
+                                                                        cfd = 68,
+                                                                        gaussianFit = True,
+                                                                        verbose=False,
+                                                                        save=False,
+                                                                        full_output=True,
+                                                                        title=source,
+                                                                        edgecolor = 'm',
+                                                                        facecolor = 'b',range=())
+
+        pKey = ['r','theta','f']
+        PA = val_max[pKey[1]]-90
+        if PA < -180: PA = val_max[pKey[1]]+360
+
+        final_pos.append([val_max[pKey[0]],conf[pKey[0]][0],conf[pKey[0]][1]])
+        final_PA.append([PA,conf[pKey[1]][0],conf[pKey[1]][1]])
+        final_contr.append([val_max[pKey[2]],conf[pKey[2]][0],conf[pKey[2]][1]])
+        final_pos_gauss.append([mu[0],sigma[0]])
+        final_PA_gauss.append([mu[1],sigma[1]])
+        final_contr_gauss.append([mu[2],sigma[2]])
+
+    # Get values into usuable arrays
+    spectra_gauss = np.array([item[0] for item in final_contr_gauss])
+    spectra_gauss_err = np.array([item[1] for item in final_contr_gauss])
+
+# Read FASTWIND calibrated spectra
+if fastwind == True:
+    ## Open file
+    f = open(fastwind_path + 'FLUXCONT', 'r')
+
+    ## Read and ignore header lines
+    header1 = f.readline()
+
+    # Define the wavelength and fnue
+    fast_wavel_a1 = 0
+    fast_flux_a1 = 0
+    fast_wavel_a1 = np.array([])
+    fast_flux_a1 = np.array([])
+
+    ## Loop over lines and extract variables of interest within the wavelength range of IFS
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        if float(columns[1]) > 9400 and float(columns[1]) < 16400:
+            fast_wavel_a1 = np.append(fast_wavel_a1,float(columns[1]))
+            fast_flux_a1 = np.append(fast_flux_a1,float(columns[2]))
+        if float(columns[1]) < 9300:
+            break
+    f.close()
+    # The flux is measured the opposite way as for IFS
+    fast_wavel_a1 = fast_wavel_a1[::-1]
+    fast_flux_a1 = fast_flux_a1[::-1]
+
+    ## Adjust the model spectra to the same wavelengths as IFS
+    model_spectra_a1 = np.interp(wl*1e4,fast_wavel_a1,fast_flux_a1)
+
+    ## Define some parameters
+    model_flux_a1 = np.zeros_like(wl)
+    model_FLUX_a1 = np.array([])
+    model_WL_a1 = np.array([])
+
+    ## Put the flux from frequency to wavelength space
+    for i in range(len(wl)):
+        model_flux_a1[i] = (c*1e10) / (wl[i]*1e4)**2 * 10**(model_spectra_a1[i])
+
+    ## Scale the flux to a distance of Ro
+    flux_a1 = model_flux_a1/(dist_fast)**2 * (120*rad_fast)**2 #Use 100 Ro for distance to flux measurement
+
+    f = open("/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/qzcar_simplex_flux_final.txt",'r')
+
+# Companion spectrum calibration
+if calib_spec == True:
+    ## Define parameters
+    fcomp = np.array([])
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        fcomp = np.append(fcomp,float(columns[1]))
