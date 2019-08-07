@@ -74,13 +74,14 @@ cspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_calib_spec
 mag_contr = False # Do you to calculate the magnitude contrasts for your companion?
 print_mag_contr = False # Do you wish to print the magnitude contrasts to the screen?
 
-## Absolute magnitude
+## Absolute magnitude !! Work in Progress !!
 abs_mag = False # Would you like to calculate the absolute magnitudes of your companion?
 print_abs_mag = False # Do you wish to print the absolute magnitudes to the screen?
-### Magnitude of central star
-star_mag_Y = 5.75 # No information, had to guess
-star_mag_J = 5.551
-star_mag_H = 5.393
+star_mag_Y = 5.75 # Magnitude of central star Y band
+star_mag_J = 5.551 # Magnitude of central star J band
+star_mag_H = 5.393 # Magnitude of central star h band
+star_mag_V = 6.24 # Magnitude of central star V band
+star_dist = 2300. # Distance to central star in parsec
 
 # ---------------------------------------------------------------------------
 
@@ -431,18 +432,51 @@ if mag_contr == True:
 # Absolute magnitudes
 if abs_mag == True:
 
-    #Zero-point flux m=0
+    ## Zero-point flux m=0
     star_flux_Y = 2026*10**(star_mag_Y/-2.5)
     star_flux_J = 1600*10**(star_mag_J/-2.5)
     star_flux_H = 1080*10**(star_mag_H/-2.5)
 
-    #Companion flux
+    ## Companion flux
     FluxJy_Y = contr_spec_Y * star_flux_Y
     FluxJy_J = contr_spec_J * star_flux_J
     FluxJy_H = contr_spec_H * star_flux_H
 
-    #Companion magnitude
+    ## Companion magnitude
     mag_comp = np.zeros([3])
     mag_comp[0] = -2.5 * mh.log10(FluxJy_Y/#Yband zero point flux)
     mag_comp[1] = -2.5 * mh.log10(FluxJy_J/#Yband zero point flux)
     mag_comp[2] = -2.5 * mh.log10(FluxJy_H/#Yband zero point flux)
+    mag_comp_err = np.zeros([3])
+    mag_comp_err[0] = -2.5 * mh.log10(FluxJy_Y/#Yband zero point flux)
+    mag_comp_err[1] = -2.5 * mh.log10(FluxJy_J/#Yband zero point flux)
+    mag_comp_err[2] = -2.5 * mh.log10(FluxJy_H/#Yband zero point flux)
+
+    ## Extinction
+    BV_obs = 6.37-6.24
+    BV_O = -0.26
+    Rv = 3.1
+    E_BV = BV_obs - BV_O
+    Av = Rv * E_BV
+    Ay = Av * # Missing
+    Aj = Av * 0.282
+    Ah = Av * 0.175
+
+    ## Absolute magnitude
+    M_comp = np.zeros_like(mag_comp)
+    M_comp[0] = mag_comp[0] - Ay - 5*(mh.log10(star_dist)-1)
+    M_comp[1] = mag_comp[1] - Aj - 5*(mh.log10(star_dist)-1)
+    M_comp[2] = mag_comp[2] - Ah - 5*(mh.log10(star_dist)-1)
+    M_comp_err = np.zeros_like(mag_comp)
+    M_comp_err[0] = mag_comp[0] - Ay - 5*(mh.log10(star_dist)-1)
+    M_comp_err[1] = mag_comp[1] - Aj - 5*(mh.log10(star_dist)-1)
+    M_comp_err[2] = mag_comp[2] - Ah - 5*(mh.log10(star_dist)-1)
+
+    ## Print absolute magnitudes
+    if print_abs_mag == True:
+        print("Y apparent magnitude: " + mag_comp[0] + " +/- " + mag_comp_err[0])
+        print("J apparent magnitude: " + mag_comp[1] + " +/- " + mag_comp_err[1])
+        print("H apparent magnitude: " + mag_comp[2] + " +/- " + mag_comp_err[2])
+        print("Y absolute magnitude: " + M_comp[0] + " +/- " + M_comp_err[0])
+        print("J absolute magnitude: " + M_comp[1] + " +/- " + M_comp_err[1])
+        print("H absolute magnitude: " + M_comp[2] + " +/- " + M_comp_err[2])
