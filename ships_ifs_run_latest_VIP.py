@@ -70,6 +70,18 @@ calib_star_spec_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/fastwind
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Path to spectrum file
 cspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_calib_spectra.txt' # Path to calibrated spectrum
 
+## Magnitude contrasts
+mag_contr = False # Do you to calculate the magnitude contrasts for your companion?
+print_mag_contr = False # Do you wish to print the magnitude contrasts to the screen?
+
+## Absolute magnitude
+abs_mag = False # Would you like to calculate the absolute magnitudes of your companion?
+print_abs_mag = False # Do you wish to print the absolute magnitudes to the screen?
+### Magnitude of central star
+star_mag_Y = 5.75 # No information, had to guess
+star_mag_J = 5.551
+star_mag_H = 5.393
+
 # ---------------------------------------------------------------------------
 
 # Running script (DO NOT MODIFY)
@@ -304,39 +316,37 @@ if fastwind == True:
     header1 = f.readline()
 
     # Define the wavelength and fnue
-    fast_wavel_a1 = 0
-    fast_flux_a1 = 0
-    fast_wavel_a1 = np.array([])
-    fast_flux_a1 = np.array([])
+    fast_wavel = 0
+    fast_flux = 0
+    fast_wavel = np.array([])
+    fast_flux = np.array([])
 
     ## Loop over lines and extract variables of interest within the wavelength range of IFS
     for line in f:
         line = line.strip()
         columns = line.split()
         if float(columns[1]) > 9400 and float(columns[1]) < 16400:
-            fast_wavel_a1 = np.append(fast_wavel_a1,float(columns[1]))
-            fast_flux_a1 = np.append(fast_flux_a1,float(columns[2]))
+            fast_wavel = np.append(fast_wavel,float(columns[1]))
+            fast_flux = np.append(fast_flux,float(columns[2]))
         if float(columns[1]) < 9300:
             break
     f.close()
     # The flux is measured the opposite way as for IFS
-    fast_wavel_a1 = fast_wavel_a1[::-1]
-    fast_flux_a1 = fast_flux_a1[::-1]
+    fast_wavel = fast_wavel[::-1]
+    fast_flux = fast_flux[::-1]
 
     ## Adjust the model spectra to the same wavelengths as IFS
-    model_spectra_a1 = np.interp(wl*1e4,fast_wavel_a1,fast_flux_a1)
+    model_spectra = np.interp(wl*1e4,fast_wavel,fast_flux)
 
     ## Define some parameters
-    model_flux_a1 = np.zeros_like(wl)
-    model_FLUX_a1 = np.array([])
-    model_WL_a1 = np.array([])
+    model_flux = np.zeros_like(wl)
 
     ## Put the flux from frequency to wavelength space
     for i in range(len(wl)):
-        model_flux_a1[i] = (c*1e10) / (wl[i]*1e4)**2 * 10**(model_spectra_a1[i])
+        model_flux[i] = (c*1e10) / (wl[i]*1e4)**2 * 10**(model_spectra[i])
 
     ## Scale the flux to a distance of Ro
-    flux_a1 = model_flux_a1/(dist_fast)**2 * (120*rad_fast)**2 #Use 100 Ro for distance to flux measurement
+    flux = model_flux/(dist_fast)**2 * (120*rad_fast)**2 #Use 100 Ro for distance to flux measurement
 
 # Companion spectrum calibration
 if calib_spec == True:
@@ -378,3 +388,61 @@ if calib_spec == True:
             comp_spec[i][0] = calib_comp_spec
             comp_spec[i][1] = calib_comp_spec_err
         np.savetxt(cspec_file, comp_spec, delimiter='   ')
+
+# Magnitude contrasts
+if mag_contr == True:
+
+    ## Define the Y, J and H bands
+    Y = wl[0:14]
+    J = wl[14:25]
+    H = wl[25:39]
+
+    ## Calculate their respective contrast spectra
+    contr_spectra_Y = contr_spectra[0:14]
+    contr_spectra_J = contr_spectra[14:25]
+    contr_spectra_H = contr_spectra[25:39
+    contr_err_Y = contr_err[0:14]
+    contr_err_J = contr_err[14:25]
+    contr_err_H = contr_err[25:39]
+
+    ## Define some stored parameters
+    dmag_Y = np.zeros_like(contr_spec_Y)
+    dmag_J = np.zeros_like(contr_spec_J)
+    dmag_H = np.zeros_like(contr_spec_H)
+    dmag_Y_err = np.zeros_like(contr_spec_Y)
+    dmag_J_err = np.zeros_like(contr_spec_J)
+    dmag_H_err = np.zeros_like(contr_spec_H)
+
+    for i in range(len(contr_spec_Y)):
+        dmag_Y[i] = -2.5*mh.log10(contr_spec_Y[i])
+        dmag_H[i] = -2.5*mh.log10(contr_spec_H[i])
+        dmag_Y_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_Y[i]/contr_spec_Y[i]))
+        dmag_H_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_H[i]/contr_spec_H[i]))
+
+    for i in range(len(contr_spec_J)):
+        dmag_J[i] = -2.5*mh.log10(contr_spec_J[i])
+        dmag_J_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_J[i]/contr_spec_J[i]))
+
+    if print_mag_contr == True:
+        print("Y contrast magnitude: " + dmag_Y + " +/- " + dmag_Y_err)
+        print("J contrast magnitude: " + dmag_J + " +/- " + dmag_J_err)
+        print("H contrast magnitude: " + dmag_H + " +/- " + dmag_H_err)
+
+# Absolute magnitudes
+if abs_mag == True:
+
+    #Zero-point flux m=0
+    star_flux_Y = 2026*10**(star_mag_Y/-2.5)
+    star_flux_J = 1600*10**(star_mag_J/-2.5)
+    star_flux_H = 1080*10**(star_mag_H/-2.5)
+
+    #Companion flux
+    FluxJy_Y = contr_spec_Y * star_flux_Y
+    FluxJy_J = contr_spec_J * star_flux_J
+    FluxJy_H = contr_spec_H * star_flux_H
+
+    #Companion magnitude
+    mag_comp = np.zeros([3])
+    mag_comp[0] = -2.5 * mh.log10(FluxJy_Y/#Yband zero point flux)
+    mag_comp[1] = -2.5 * mh.log10(FluxJy_J/#Yband zero point flux)
+    mag_comp[2] = -2.5 * mh.log10(FluxJy_H/#Yband zero point flux)
