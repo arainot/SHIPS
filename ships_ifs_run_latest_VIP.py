@@ -45,6 +45,7 @@ adi_plot = True # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
 adi_max_scale = 1 # Maximum colour scale for the ADI plot
 detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+detect_sigma = 5 # What sigma limit would you like for the detection?
 
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
@@ -99,6 +100,7 @@ star_dist = 2300. # Distance to central star in parsec
 
 ## Load libraries
 import __init__
+import sys
 import matplotlib
 import vip_hci
 from hciplot import plot_frames, plot_cubes
@@ -161,9 +163,10 @@ if adi_frame == True:
         plot_frames(fr_adi, vmin=-1, vmax=1)
     ### Compute the detection of sources
     if detection==True:
-        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=5,bkg_sigma=5,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # 5-sigma limit for detection
-        print("Detected sources : " + detect)
+        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
+        print("Detected sources : " , "\n", detect)
         detect_pos = np.array(detect) # Converted to array in order to be used later
+        sys.exit("Sources detected. To continue, please input the target coordinates in the script and skip this process.")
 
 # Stellar photometry of the companion
 
