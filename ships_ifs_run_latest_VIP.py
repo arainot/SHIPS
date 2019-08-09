@@ -16,7 +16,7 @@ angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortf
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
 
 ## Photometry
-comp_pos = (112,55) # Companion position in pixels (X,Y)
+comp_pos = (112,55) # Companion position in pixels from the center of the frame (X,Y)
 psf_pos = (32, 33) # PSF position in pixels (X,Y)
 radial_dist = 97.684904197311155 # Radial distance of companion in pixels
 position_angle = 159.37210826761003  # Position angle of companion in degrees
@@ -39,13 +39,20 @@ see_cube_centre = False # Check if the image is centered correctly
 snr_maps = False # Would you like to make and save an SNR map to disk?
 snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/SNRmap_VIP.fits' # Finish the file with .fits
 
+## Detection
+adi_frame = True # Would you like to apply ADI on the frame?
+adi_plot = True # Would you like to see the resulting plot?
+adi_min_scale = -1 # Minimum colour scale for the ADI plot
+adi_max_scale = 1 # Maximum colour scale for the ADI plot
+detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
-extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
-save_spec = True # Save the spectrum to ascii file
+extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+save_spec = False # Save the spectrum to ascii file
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 
 ## Spectrum extraction with MCMC
@@ -80,7 +87,7 @@ abs_mag = False # Would you like to calculate the absolute magnitudes of your co
 print_abs_mag = False # Do you wish to print the absolute magnitudes to the screen?
 star_mag_Y = 5.75 # Magnitude of central star Y band
 star_mag_J = 5.551 # Magnitude of central star J band
-star_mag_H = 5.393 # Magnitude of central star h band
+star_mag_H = 5.393 # Magnitude of central star H band
 star_mag_V = 6.24 # Magnitude of central star V band
 star_dist = 2300. # Distance to central star in parsec
 
@@ -143,6 +150,20 @@ if see_psf_norm == True:
 if see_cube_centre == True:
     plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
 
+## Detection with VIP, for now only with the first wavelength
+if adi_frame == True:
+    ### Compute the ADI frame for all 39 wavelengths and 48 rotations
+    print("Computing the ADI frame...")
+    fr_adi = vip_hci.medsub.median_sub(cube, -angs, scale_list=wl, mode='fullfr') # 2D ADI frame
+    print("Done!")
+    ### Plot the frame
+    if adi_plot == True:
+        plot_frames(fr_adi, vmin=-1, vmax=1)
+    ### Compute the detection of sources
+    if detection==True:
+        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=5,bkg_sigma=5,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # 5-sigma limit for detection
+        print("Detected sources : " + detect)
+        detect_pos = np.array(detect) # Converted to array in order to be used later
 
 # Stellar photometry of the companion
 
@@ -402,7 +423,7 @@ if mag_contr == True:
     ## Calculate their respective contrast spectra
     contr_spectra_Y = contr_spectra[0:14]
     contr_spectra_J = contr_spectra[14:25]
-    contr_spectra_H = contr_spectra[25:39
+    contr_spectra_H = contr_spectra[25:39]
     contr_err_Y = contr_err[0:14]
     contr_err_J = contr_err[14:25]
     contr_err_H = contr_err[25:39]
@@ -445,13 +466,13 @@ if abs_mag == True:
 
     ## Companion magnitude
     mag_comp = np.zeros([3])
-    mag_comp[0] = -2.5 * mh.log10(FluxJy_Y/#Yband zero point flux)
-    mag_comp[1] = -2.5 * mh.log10(FluxJy_J/#Yband zero point flux)
-    mag_comp[2] = -2.5 * mh.log10(FluxJy_H/#Yband zero point flux)
+    mag_comp[0] = -2.5 * mh.log10(FluxJy_Y/1.)#Yband zero point flux)
+    mag_comp[1] = -2.5 * mh.log10(FluxJy_J/1.)#Yband zero point flux)
+    mag_comp[2] = -2.5 * mh.log10(FluxJy_H/1.)#Yband zero point flux)
     mag_comp_err = np.zeros([3])
-    mag_comp_err[0] = -2.5 * mh.log10(FluxJy_Y/#Yband zero point flux)
-    mag_comp_err[1] = -2.5 * mh.log10(FluxJy_J/#Yband zero point flux)
-    mag_comp_err[2] = -2.5 * mh.log10(FluxJy_H/#Yband zero point flux)
+    mag_comp_err[0] = -2.5 * mh.log10(FluxJy_Y/1.)#Yband zero point flux)
+    mag_comp_err[1] = -2.5 * mh.log10(FluxJy_J/1.)#Yband zero point flux)
+    mag_comp_err[2] = -2.5 * mh.log10(FluxJy_H/1.)#Yband zero point flux)
 
     ## Extinction
     BV_obs = 6.37-6.24
@@ -459,7 +480,7 @@ if abs_mag == True:
     Rv = 3.1
     E_BV = BV_obs - BV_O
     Av = Rv * E_BV
-    Ay = Av * # Missing
+    Ay = Av * 1.# Missing
     Aj = Av * 0.282
     Ah = Av * 0.175
 
