@@ -2,7 +2,7 @@
 # Date: 07/08/2019
 # Title: Running script for SHIPS for IFS data
 # Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
-# VIP version: 0.9.9 (Rainot edit.)
+# VIP version: 0.9.11 (Rainot edit.)
 # pyKLIP version: 1.1 NOT IMPLEMENTED YET
 # Python version: 3 ONLY
 ############################
@@ -14,6 +14,10 @@ cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortfra
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
+# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_convert_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
 comp_pos = (112,55) # Companion position in pixels from the center of the frame (X,Y)
@@ -37,14 +41,14 @@ see_cube_centre = False # Check if the image is centered correctly
 
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/SNRmap_VIP.fits' # Finish the file with .fits
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Detection
-adi_frame = True # Would you like to apply ADI on the frame?
-adi_plot = True # Would you like to see the resulting plot?
+adi_frame = False # Would you like to apply ADI on the frame?
+adi_plot = False # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
 adi_max_scale = 1 # Maximum colour scale for the ADI plot
-detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+detection = False # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
 detect_sigma = 5 # What sigma limit would you like for the detection?
 
 ## Contrast curves
@@ -52,14 +56,16 @@ contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
-extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 save_spec = False # Save the spectrum to ascii file
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
+plot_sspec = False # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
 extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
 source = 'QZCar' # Give name for your source
 mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results will be stored
+plot_mcmc = False # Plot the mcmc errors with simplex?
 
 ## Reading MCMC results
 read_mcmc = False # Do you wish to read the MCMC results?
@@ -133,6 +139,7 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
+#psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
@@ -144,6 +151,7 @@ if see_cube == True:
 
 ## Get FWHM of images & normalised PSF
 psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=int(13), verbose=False,full_output=True) # maxflux is a dummy variable
+
 ### Plot it
 if see_psf_norm == True:
     plot_frames(psf_norm[0], grid=True, size_factor=4)
@@ -160,7 +168,7 @@ if adi_frame == True:
     print("Done!")
     ### Plot the frame
     if adi_plot == True:
-        plot_frames(fr_adi, vmin=-1, vmax=1)
+        plot_frames(fr_adi, vmin=adi_min_scale, vmax=adi_max_scale)
     ### Compute the detection of sources
     if detection==True:
         detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
@@ -196,16 +204,16 @@ for i in range(0,wl.shape[0]):
     ### Apertures dependent on channel
     aper_comp = photutils.CircularAperture(comp_pos, 1./2*fwhm[i])
     aper_psf = photutils.CircularAperture(psf_pos, 1./2*fwhm[i])
-    #Noise
+    ### Noise
     phot_noise = photutils.aperture_photometry(cube_wl_coll[i], aper_noise_comp)
     noise_phot[i] = np.array(phot_noise['aperture_sum'])
-    #PSF
+    ### PSF
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
     psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
     psf_bkg_sum = psf_bkg_mean * aper_psf.area()
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
-    #Companion
+    ### Companion
     phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
     bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
     bkg_sum = bkg_mean * aper_comp.area()
@@ -237,7 +245,7 @@ elif contrast_curves == False:
 if extract_spec == True:
 
     ## Define some parameters
-    comp_xycoord = [[comp_pos[0],comp_pos[1]]] # Companion coords
+    comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
     f_guess_pl = 200. # Flux first guess
     f_range = np.linspace(0.*f_guess_pl,10 *f_guess_pl,400)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
@@ -247,7 +255,9 @@ if extract_spec == True:
     ## Start Simplex
     for i in range(0,len(wl)):
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
-        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp_pca,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
+        #simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,annulus_width=3,aperture_radius=3,verbose=False,simplex=True)
+         #simplex_guess[i] = vip_hci.negfc.firstguess(x[i],-angs,psf_norm[i],ncomp_pca,pxscale,planets_xy_coord=[(127,243)],fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,verbose=False,simplex=True,annulus_width=3,aperture_radius=3)
+        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=4,aperture_radius=4,simplex_options=simplex_options,f_range=None,simplex=True,verbose=False) # This takes some time
         print(simplex_guess[i])
 ## Save the spectrum
 if save_spec == True:
