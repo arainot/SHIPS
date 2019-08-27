@@ -14,13 +14,13 @@
 # wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
 # angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
 # psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_convert_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = ([346,777],[228,569],[312,486],[490,456],[519,243],[688,628],[653,707],[560,578],[72,534],[570,701],[451,61],[820,182],[848,491],[897,507]) # Companion position in pixels (X,Y)
+comp_pos = ([421,881],[857,764],[501,525],[84,434],[418,357]) # Companion position in pixels (X,Y)
 psf_pos = (32, 33) # PSF position in pixels (X,Y)
 radial_dist = [ 312.6995363 ,  289.66359799,  201.68291946,   60.16643583,
         269.09106265,  210.78899402,  240.63665556,   81.60882305,
@@ -36,16 +36,18 @@ ncores = 4 # Number of cores you are willing to share for the computation
 
 ## PCA
 ncomp_pca = 1 # Number of principal components for PCA
+opti_pca = False # Optimise the number of PCA components?
+source = (501,525) # Source where to optimise the PCA
 
 ## Do you want to see the image?
 see_cube = False # Original cube
-see_collapsed_cube = False # Collapsed cube
+see_collapsed_cube = True # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
 
 ## SNR maps
-snr_maps = True # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/SNRmap_VIP.fits' # Finish the file with .fits
+snr_maps = False # Would you like to make and save an SNR map to disk?
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93129A/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Detection
 adi_frame = False # Would you like to apply ADI on the frame?
@@ -161,6 +163,11 @@ if see_psf_norm == True:
 ## Check if the cube is centred correctly by plotting
 if see_cube_centre == True:
     plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
+
+## Optimise the number of PCA components
+if opti_pca == True:
+    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=source,mask_center_px=None, ncomp=(1, 41, 2))
+    sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
 
 ## Detection with VIP, for now only with the first wavelength
 if adi_frame == True:

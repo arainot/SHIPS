@@ -32,6 +32,8 @@ ncores = 4 # Number of cores you are willing to share for the computation
 
 ## PCA
 ncomp_pca = 1 # Number of principal components for PCA
+source = (501,525) # Source where to optimise the PCA
+opti_pca = False # Optimise the number of PCA components?
 
 ## Do you want to see the image?
 see_cube = False # Original cube
@@ -57,20 +59,22 @@ n_branches = 1 # Number of branches for contrast curves
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+ann_width = 3 # Annulus width of Simplex
+aper_radius = 3 # Aperture Radius of PCA
 save_spec = False # Save the spectrum to ascii file
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 plot_sspec = False # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
-extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
+extract_mcmc = True # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
 source = 'QZCar' # Give name for your source
-mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results will be stored
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results will be stored
 plot_mcmc = False # Plot the mcmc errors with simplex?
 
 ## Reading MCMC results
 read_mcmc = False # Do you wish to read the MCMC results?
 source = 'QZCar' # Give name for your source
-mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results are stored
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results are stored
 
 ## Load calibrated FASTWIND models of the central star
 fastwind = False # Use FASTWIND model spectra for the star
@@ -159,6 +163,11 @@ if see_psf_norm == True:
 ## Check if the cube is centred correctly by plotting
 if see_cube_centre == True:
     plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
+
+## Optimise the number of PCA components
+if opti_pca == True:
+    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=source,mask_center_px=None, ncomp=(1, 41, 2))
+    sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
 
 ## Detection with VIP, for now only with the first wavelength
 if adi_frame == True:
@@ -257,17 +266,17 @@ if extract_spec == True:
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
         #simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,annulus_width=3,aperture_radius=3,verbose=False,simplex=True)
          #simplex_guess[i] = vip_hci.negfc.firstguess(x[i],-angs,psf_norm[i],ncomp_pca,pxscale,planets_xy_coord=[(127,243)],fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,verbose=False,simplex=True,annulus_width=3,aperture_radius=3)
-        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=4,aperture_radius=4,simplex_options=simplex_options,f_range=None,simplex=True,verbose=False) # This takes some time
+        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=None,simplex=True,verbose=False) # This takes some time
         print(simplex_guess[i])
-## Save the spectrum
-if save_spec == True:
-    np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
+
+    ## Save the spectrum
+    if save_spec == True:
+        np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
+        print("Spectrum saved successfully!")
 
 # Spectrum extraction with MCMC
 if extract_mcmc == True:
     instru= 'IFS36059' # Define instrument parameters
-    ann_width=annulus_width # Annulus width of MCMC
-    aperture_radius=aperture_width # Aperture radius
     fig_merit='sum' # Summation figure of merit
     outpath = mcmc_path.format(source) # Path to save MCMC files
 
@@ -279,11 +288,11 @@ if extract_mcmc == True:
         bounds=[[0.75*initialState[0],1.25*initialState[0]],[0.75*initialState[1],1.25*initialState[1]],[0.75*initialState[2],1.30*initialState[2]]] # Initiate bounds
         output_file = source+'_IFS_wavelength_{}'.format(i) # Save to output file
 
-        chain_40 = vip.negfc.mcmc_negfc_sampling(cube[i], -angs,  psf_scaled[i], ncomp_pca, pxscale, initialState, ann_width,
-                                                 aperture_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
+        chain_40 = vip_hci.negfc.mcmc_negfc_sampling(cube[i], -angs,  psf_norm[i], ncomp_pca, pxscale, initialState, ann_width,
+                                                 aper_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
                                                  bounds=bounds, niteration_min=itermin,
                                                  niteration_limit=itermax, check_maxgap=50, nproc= ncores,
-                                                 output_file=output_file, display=True,verbose=True, save=True,
+                                                 output_file=output_file, display=True,verbosity=1, save=True,
                                                  rhat_threshold=1.01, niteration_supp=0, fmerit=fig_merit) # MCMC run per channel
     print("########## MCMC Sampling done! ##########")
 
