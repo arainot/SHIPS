@@ -20,8 +20,8 @@ angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_conve
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = ([421,881],[857,764],[501,525],[84,434],[418,357]) # Companion position in pixels (X,Y)
-psf_pos = (32, 33) # PSF position in pixels (X,Y)
+comp_pos = ([501,525],[881,421],[764,857],[84,434],[418,357]) # Companion position in pixels (X,Y)
+psf_pos = (33, 33) # PSF position in pixels (X,Y)
 radial_dist = [ 312.6995363 ,  289.66359799,  201.68291946,   60.16643583,
         269.09106265,  210.78899402,  240.63665556,   81.60882305,
         440.54965668,  197.69926656,  455.10658092,  451.40225963,
@@ -34,20 +34,20 @@ noise_aperture_pos_psf = (33,33) # Position in pixels of the circular annulus ap
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
+## Do you want to see the image?
+see_cube = False # Original cube
+see_collapsed_cube = False # Collapsed cube
+see_psf_norm = True # Normalised PSF
+see_cube_centre = False # Check if the image is centered correctly
+
 ## PCA
-ncomp_pca = 1 # Number of principal components for PCA
+ncomp_pca = 0 # Number of principal components for PCA
 opti_pca = False # Optimise the number of PCA components?
 source = (501,525) # Source where to optimise the PCA
 
-## Do you want to see the image?
-see_cube = False # Original cube
-see_collapsed_cube = True # Collapsed cube
-see_psf_norm = False # Normalised PSF
-see_cube_centre = False # Check if the image is centered correctly
-
 ## SNR maps
-snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93129A/SNRmap_VIP.fits' # Finish the file with .fits
+snr_maps = True # Would you like to make and save an SNR map to disk?
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/SNRmap_VIP_n0.fits' # Finish the file with .fits
 
 ## Detection
 adi_frame = False # Would you like to apply ADI on the frame?
@@ -155,7 +155,7 @@ if see_cube == True:
     ds9.display(cube[0,0])
 
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=int(13), verbose=False,full_output=True) # maxflux is a dummy variable
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=None, verbose=False,full_output=True) # maxflux is a dummy variable
 ### Plot it
 if see_psf_norm == True:
     plot_frames(psf_norm[0], grid=True, size_factor=4)
@@ -166,7 +166,7 @@ if see_cube_centre == True:
 
 ## Optimise the number of PCA components
 if opti_pca == True:
-    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=source,mask_center_px=None, ncomp=(1, 41, 2))
+    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=(501,525),mask_center_px=None, ncomp=(1, 41, 2))
     sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
 
 ## Detection with VIP, for now only with the first wavelength

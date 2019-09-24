@@ -10,30 +10,25 @@
 # Set up your parameters
 
 ## Define images to analyse
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_convert_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE-center_im.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = (112,55) # Companion position in pixels from the center of the frame (X,Y)
+comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
 psf_pos = (32, 33) # PSF position in pixels (X,Y)
-radial_dist = 97.684904197311155 # Radial distance of companion in pixels
-position_angle = 159.37210826761003  # Position angle of companion in degrees
+radial_dist = 97. # Radial distance of companion in pixels
+position_angle = 159.  # Position angle of companion in degrees
 noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
-
-## PCA
-ncomp_pca = 1 # Number of principal components for PCA
-source = (501,525) # Source where to optimise the PCA
-opti_pca = False # Optimise the number of PCA components?
 
 ## Do you want to see the image?
 see_cube = False # Original cube
@@ -41,9 +36,14 @@ see_collapsed_cube = False # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
 
+## PCA
+ncomp_pca = 1 # Number of principal components for PCA
+opti_pca = False # Optimise the number of PCA components?
+source_pca = (82.,116.) # Source where to optimise the PCA
+
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/SNRmap_VIP.fits' # Finish the file with .fits
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/SNRmap_VIP_ncomp1.fits' # Finish the file with .fits
 
 ## Detection
 adi_frame = False # Would you like to apply ADI on the frame?
@@ -57,16 +57,19 @@ detect_sigma = 5 # What sigma limit would you like for the detection?
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
+## Aperture Photometry
+plot_aper = False # Plot the aperture photometry of the detected companion?
+
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
-save_spec = False # Save the spectrum to ascii file
-sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
-plot_sspec = False # Plot the resulting spectrum?
+save_spec = True # Save the spectrum to ascii file
+sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
+plot_sspec = True # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
-extract_mcmc = True # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
+extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
 source = 'QZCar' # Give name for your source
 mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results will be stored
 plot_mcmc = False # Plot the mcmc errors with simplex?
@@ -143,7 +146,7 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-#psf = np.median(psf, axis=1) # Take the median of all PSFs
+psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
@@ -154,19 +157,19 @@ if see_cube == True:
     ds9.display(cube[0,0])
 
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=int(13), verbose=False,full_output=True) # maxflux is a dummy variable
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=31,verbose=False,full_output=True) # maxflux is a dummy variable
 
 ### Plot it
 if see_psf_norm == True:
-    plot_frames(psf_norm[0], grid=True, size_factor=4)
+    plot_frames(psf_norm[0], grid=True, size_factor=10)
 
 ## Check if the cube is centred correctly by plotting
 if see_cube_centre == True:
-    plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
+    plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=10)
 
 ## Optimise the number of PCA components
 if opti_pca == True:
-    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=source,mask_center_px=None, ncomp=(1, 41, 2))
+    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=(129,169),mask_center_px=None, ncomp=(1, 41, 2))
     sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
 
 ## Detection with VIP, for now only with the first wavelength
@@ -240,10 +243,10 @@ if snr_maps == True:
 
 ## Contrast curve
 if contrast_curves == True:
-    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=-105,plsc=pxscale,rad_dists=[radial_dist],theta=PA) # Remove companion using NEGFC technique
+    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=-final_sum,plsc=pxscale,rad_dists=[radial_dist],theta=PA) # Remove companion using NEGFC technique
     print("Companion removed")
     print("Computing contrast curve...")
-    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
+    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
 elif contrast_curves == False:
@@ -255,8 +258,8 @@ if extract_spec == True:
 
     ## Define some parameters
     comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
-    f_guess_pl = 200. # Flux first guess
-    f_range = np.linspace(0.*f_guess_pl,10 *f_guess_pl,400)
+    f_guess_pl = 100. # Flux first guess
+    f_range = np.linspace(0.*f_guess_pl,5 *f_guess_pl, 100)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
     simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
     simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
@@ -266,7 +269,7 @@ if extract_spec == True:
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
         #simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,annulus_width=3,aperture_radius=3,verbose=False,simplex=True)
          #simplex_guess[i] = vip_hci.negfc.firstguess(x[i],-angs,psf_norm[i],ncomp_pca,pxscale,planets_xy_coord=[(127,243)],fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,verbose=False,simplex=True,annulus_width=3,aperture_radius=3)
-        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=None,simplex=True,verbose=False) # This takes some time
+        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range,simplex=True,fmerit='stddev',verbose=False,plot=False,save=False) # This takes some time
         print(simplex_guess[i])
 
     ## Save the spectrum
@@ -524,3 +527,43 @@ if abs_mag == True:
         print("Y absolute magnitude: " + M_comp[0] + " +/- " + M_comp_err[0])
         print("J absolute magnitude: " + M_comp[1] + " +/- " + M_comp_err[1])
         print("H absolute magnitude: " + M_comp[2] + " +/- " + M_comp_err[2])
+
+
+# Plotting
+
+## Aperture Photometry
+if plot_aper == True:
+    plt.figure(figsize=(12, 9))
+    #plt.title('Aperture Photometry IFS')
+    #plt.legend()
+    # ax.get_xaxis().tick_bottom()
+    # ax.get_yaxis().tick_left()
+    plt.ylim(0, 1.1*max(final_sum))
+    plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    #plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.3)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("Flux [ADU/s]", fontsize=20)
+    plt.xlabel('Wavelength [$\mathring{A}$]', fontsize=20)
+    plt.plot(wl*1e4, final_sum,lw=2.8)
+    plt.show()
+
+## Simplex Optim
+if plot_sspec == True:
+    simplex_flux = np.zeros_like(wl)
+    for i in range(len(wl)):
+        simplex_flux[i] = simplex_guess[i][2]
+    plt.figure(figsize=(12, 9))
+    #plt.title('Aperture Photometry IFS')
+    #plt.legend()
+    # ax.get_xaxis().tick_bottom()
+    # ax.get_yaxis().tick_left()
+    plt.ylim(0, 1.1*max(simplex_flux))
+    plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    #plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.3)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("Simplex flux [ADU/s]", fontsize=20)
+    plt.xlabel('Wavelength [$\mathring{A}$]', fontsize=20)
+    plt.plot(wl*1e4, simplex_flux,lw=2.8)
+    plt.show()
