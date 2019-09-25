@@ -54,9 +54,14 @@ psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=No
 
 import os
 rootdir = '/Users/alan/Documents/PhD/Data/SPHERE/IFS'
-
 for subdir, dirs, files in os.walk(rootdir):
-    for file in files:
-        if filepath.endswith(".fits"):
-            print(os.path.join(subdir, file))
-        print os.path.join(subdir, file)
+    if subdir.startswith("/Users/alan/Documents/PhD/Data/SPHERE/IFS/Q") or subdir.startswith("/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403") or subdir.startswith("/Users/alan/Documents/PhD/Data/SPHERE/IFS/P"):
+        continue
+    if subdir.startswith("/Users/alan/Documents/PhD/Data/SPHERE/IFS/H") or subdir.startswith("/Users/alan/Documents/PhD/Data/SPHERE/IFS/V"):
+        for file in files:
+            if file.endswith(".fits"):
+                print(os.path.join(subdir, file))
+
+import pathlib
+path = pathlib.PurePath('/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403')
+path.name

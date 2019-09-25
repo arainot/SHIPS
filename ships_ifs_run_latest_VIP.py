@@ -14,10 +14,10 @@
 # wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 # angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
 # psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE-center_im.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/ifs_convert_dc2-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD92206/ifs_convert_dc2-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD92206/ifs_convert_dc2-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE-center_im.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD92206/ifs_convert_dc2-IFS_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD92206/ifs_convert_dc2-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
 comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
@@ -43,14 +43,14 @@ source_pca = (82.,116.) # Source where to optimise the PCA
 
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IFS/HD151805/SNRmap_VIP_ncomp1.fits' # Finish the file with .fits
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD92206/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Detection
-adi_frame = False # Would you like to apply ADI on the frame?
+adi_frame = True # Would you like to apply ADI on the frame?
 adi_plot = False # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
 adi_max_scale = 1 # Maximum colour scale for the ADI plot
-detection = False # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
 detect_sigma = 5 # What sigma limit would you like for the detection?
 
 ## Contrast curves
@@ -61,12 +61,12 @@ n_branches = 1 # Number of branches for contrast curves
 plot_aper = False # Plot the aperture photometry of the detected companion?
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
-extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
-save_spec = True # Save the spectrum to ascii file
+save_spec = False # Save the spectrum to ascii file
 sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
-plot_sspec = True # Plot the resulting spectrum?
+plot_sspec = False # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
 extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
@@ -183,7 +183,7 @@ if adi_frame == True:
         plot_frames(fr_adi, vmin=adi_min_scale, vmax=adi_max_scale)
     ### Compute the detection of sources
     if detection==True:
-        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
+        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False,plot=False) # Sigma limit provided by user
         print("Detected sources : " , "\n", detect)
         detect_pos = np.array(detect) # Converted to array in order to be used later
         sys.exit("Sources detected. To continue, please input the target coordinates in the script and skip this process.")

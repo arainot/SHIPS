@@ -9,11 +9,12 @@
 
 # Set up your parameters
 
+## Read the user folder
+import sys
+fold = sys.argv[1] # read the folder name
+print(fold)
+
 ## Define images to analyse
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
 cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'

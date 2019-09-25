@@ -1,7 +1,7 @@
 ############################
-# Date: 08/08/2019
-# Title: Running script for SHIPS for IRDIS data
-# Description: Use this script to run SHIPS for IRDIS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
+# Date: 07/08/2019
+# Title: Running script for SHIPS for IFS data
+# Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
 # VIP version: 0.9.11 (Rainot edit.)
 # pyKLIP version: 1.1 NOT IMPLEMENTED YET
 # Python version: 3 ONLY
@@ -9,53 +9,44 @@
 
 # Set up your parameters
 
+## Read the user folder
+import sys
+fold = sys.argv[1] # read the folder name
+print(fold)
+
 ## Define images to analyse
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = ([501,525],[881,421],[764,857],[84,434],[418,357]) # Companion position in pixels (X,Y)
-psf_pos = (33, 33) # PSF position in pixels (X,Y)
-radial_dist = [ 312.6995363 ,  289.66359799,  201.68291946,   60.16643583,
-        269.09106265,  210.78899402,  240.63665556,   81.60882305,
-        440.54965668,  197.69926656,  455.10658092,  451.40225963,
-        336.65561038,  385.03246616] # Radial distance of companion in pixels
-position_angle = [327.93634992,  281.34872447,  262.59308787,  201.44773633,
-        178.50936816,   56.61148642,   35.86982352,   36.02737339] # Position angle of companion in degrees
-noise_aperture_pos_comp = (512,512) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
-noise_aperture_pos_psf = (33,33) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
+psf_pos = (32, 33) # PSF position in pixels (X,Y)
+radial_dist = 97. # Radial distance of companion in pixels
+position_angle = 159.  # Position angle of companion in degrees
+noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
-## Do you want to see the image?
-see_cube = False # Original cube
-see_collapsed_cube = True # Collapsed cube
-see_psf_norm = False # Normalised PSF
-see_cube_centre = False # Check if the image is centered correctly
-
 ## PCA
-ncomp_pca = 5 # Number of principal components for PCA
-opti_pca = False # Optimise the number of PCA components?
-source = (501,525) # Source where to optimise the PCA
+ncomp_pca = 1 # Number of principal components for PCA
 
 ## SNR maps
-snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/SNRmap_VIP.fits' # Finish the file with .fits
+snr_maps = True # Would you like to make and save an SNR map to disk?
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Detection
 adi_frame = True # Would you like to apply ADI on the frame?
-adi_plot = True # Would you like to see the resulting plot?
+adi_plot = False # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
-adi_max_scale = 3 # Maximum colour scale for the ADI plot
+adi_max_scale = 1 # Maximum colour scale for the ADI plot
 detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
 detect_sigma = 5 # What sigma limit would you like for the detection?
+save_detect = True # Save detections?
+detect_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/VIP_detections.txt' # Save coordinates to file
 
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
@@ -63,45 +54,22 @@ n_branches = 1 # Number of branches for contrast curves
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+ann_width = 3 # Annulus width of Simplex
+aper_radius = 3 # Aperture Radius of PCA
 save_spec = False # Save the spectrum to ascii file
-sspec_file_K1 = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex_K1.txt' # Filepath to save the Simplex spectrum for the K1 band
-sspec_file_K2 = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt' # Filepath to save the Simplex spectrum for the K2 band
+sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
+plot_sspec = False # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
-extract_mcmc = False # Will compute the MCMC for all sources !! This takes ~22h per source and is very computer intensive !!
-source = 'QZCar' # Give name for your primary star
-mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/spectra/' # Directory where MCMC results will be stored
+extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
+source = 'QZCar' # Give name for your source
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results will be stored
+plot_mcmc = False # Plot the mcmc errors with simplex?
 
 ## Reading MCMC results
 read_mcmc = False # Do you wish to read the MCMC results?
 source = 'QZCar' # Give name for your source
-mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/spectra/' # Directory where MCMC results are stored
-
-## Load calibrated FASTWIND models of the central star
-fastwind = False # Use FASTWIND model spectra for the star
-fastwind_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/fastwind/qzcarAa1/' # Directory where the FASTWIND flux are
-rad_fast = 22.1 # Radius of model star
-dist_fast = 100. # Distance to consider for the flux of the calibrated spectrum in Ro
-
-## Compute calibrated spectrum of companion
-calib_spec = False # Do you wish to calibrate the spectrum of the companions?
-save_calib_spec = False # Would you like to save the calibrated spectrum & associated error?
-calib_star_spec_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/fastwind/qzcar_fastwind_spec.txt' # Path to calibrated spectrum of central star
-sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex.txt' # Path to spectrum file
-cspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_calib_spectra.txt' # Path to calibrated spectrum
-
-## Magnitude contrasts
-mag_contr = False # Do you to calculate the magnitude contrasts for your sources?
-print_mag_contr = False # Do you wish to print the magnitude contrasts to the screen?
-
-## Absolute magnitude !! Work in Progress !!
-abs_mag = False # Would you like to calculate the absolute magnitudes of your sources?
-print_abs_mag = False # Do you wish to print the absolute magnitudes to the screen?
-star_mag_Y = 5.75 # Magnitude of central star Y band
-star_mag_J = 5.551 # Magnitude of central star J band
-star_mag_H = 5.393 # Magnitude of central star H band
-star_mag_V = 6.24 # Magnitude of central star V band
-star_dist = 2300. # Distance to central star in parsec
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results are stored
 
 # ---------------------------------------------------------------------------
 
@@ -134,8 +102,8 @@ from scipy.integrate import quad, dblquad
 c = 299792458. # Speed of light
 Ro = 6.957e8 # Solar Radius
 sr2pc = 44334448.0068964 # Convert steraradians to parsec
-pxscale = 0.1225 # IRDIS pixel scale in arcsec/pixel
-PA = np.array(position_angle) + 90 # Correct for VIP unconventional rotation axis
+pxscale = 0.0074 # IFS pixel scale in arcsec/pixel
+PA = position_angle + 90 # Correct for VIP unconventional rotation axis
 
 ## Open image files
 cube = vip_hci.fits.open_fits(cube_filepath)
@@ -144,30 +112,13 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-psf = np.median(psf, axis=1) # Take the median value of all psf observations
+psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
 
-## Check the RAW data cubes
-if see_cube == True:
-    ds9 = vip_hci.Ds9Window()
-    ds9.display(cube[0,0])
-
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=None, verbose=False,full_output=True) # maxflux is a dummy variable
-### Plot it
-if see_psf_norm == True:
-    plot_frames(psf_norm[0], grid=True, size_factor=4)
-
-## Check if the cube is centred correctly by plotting
-if see_cube_centre == True:
-    plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
-
-## Optimise the number of PCA components
-if opti_pca == True:
-    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=(501,525),mask_center_px=None, ncomp=(1, 41, 2))
-    sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=31,verbose=False,full_output=True) # maxflux is a dummy variable
 
 ## Detection with VIP, for now only with the first wavelength
 if adi_frame == True:
@@ -180,16 +131,14 @@ if adi_frame == True:
         plot_frames(fr_adi, vmin=adi_min_scale, vmax=adi_max_scale)
     ### Compute the detection of sources
     if detection==True:
-        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
+        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, plot=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
         print("Detected sources : " , "\n", detect)
         detect_pos = np.array(detect) # Converted to array in order to be used later
-        sys.exit("Sources detected. To continue, please input the target coordinates in the script and skip this process.")
+        #### Save the coordinates
+        if save_detect == True:
+            np.savetxt(detect_file, detect_pos, delimiter='   ') # Saves to file
+            print("Saved to file!")
 
-## SNR maps
-if snr_maps == True:
-    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=True)
-    vip_hci.fits.write_fits(snr_map_file,snrmap) # Write SNR maps to file
-    sys.exit("SNR maps created. To continue, please input follow from the beginning process.")
 
 # Stellar photometry of the companion
 
@@ -198,62 +147,53 @@ cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the
 cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
 cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
 
-## Check the collapsed data cubes
-if see_collapsed_cube == True:
-    ds9 = vip_hci.Ds9Window()
-    ds9.display(cube_wl_coll[0],cube_coll) # cube_wl_coll on the left and cube_coll on the right
-
 ## Aperture photometry of companions and PSF
 
 ### Define photometry
 noise_phot = np.zeros_like(wl) #Noise photometry
 psf_final_sum = np.zeros_like(wl) #PSF photometry
-final_sum_K1 = np.zeros_like(radial_dist) #Companion photometry in the K1 band
-final_sum_K2 = np.zeros_like(radial_dist) #Companion photometry in the K2 band
+final_sum = np.zeros_like(wl) #Companion photometry
 
 ### Apertures
+aper_noise_comp = photutils.CircularAnnulus((145,145),noise_aperture_pos_comp[0],noise_aperture_pos_comp[1])
 aper_noise_psf = photutils.CircularAnnulus(psf_pos,noise_aperture_pos_psf[0],noise_aperture_pos_psf[1])
 
-### Aperture photometry - PSF
-for i in range(0,len(wl)):
-    ### Aperture
+### Aperture photometry
+for i in range(0,wl.shape[0]):
+    ### Apertures dependent on channel
+    aper_comp = photutils.CircularAperture(comp_pos, 1./2*fwhm[i])
     aper_psf = photutils.CircularAperture(psf_pos, 1./2*fwhm[i])
-    ### Flux
+    ### Noise
+    phot_noise = photutils.aperture_photometry(cube_wl_coll[i], aper_noise_comp)
+    noise_phot[i] = np.array(phot_noise['aperture_sum'])
+    ### PSF
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
     psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
     psf_bkg_sum = psf_bkg_mean * aper_psf.area()
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
-
-### Aperture photometry - Companions
-for i in range(0,len(radial_dist)):
-    ### Apertures dependent on companions
-    aper_noise_comp = photutils.CircularAnnulus((512,512),radial_dist[i]-5,radial_dist[i]+5)
-    aper_comp_K1 = photutils.CircularAperture((coord[i][0], coord[i][1]),1./2*fwhm[0])
-    aper_comp_K2 = photutils.CircularAperture((coord[i][0], coord[i][1]),1./2*fwhm[1])
-    ### Flux
-    phot_noise_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_noise_comp)
-    phot_noise_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_noise_comp)
-    phot_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_comp_K1)
-    phot_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_comp_K2)
-    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K1.area())
-    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K2.area())
-    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area()
-    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area()
-    final_sum_K1[i] = phot_K1['aperture_sum'] - bkg_sum_K1
-    final_sum_K2[i] = phot_K2['aperture_sum'] - bkg_sum_K2
+    ### Companion
+    phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
+    bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
+    bkg_sum = bkg_mean * aper_comp.area()
+    final_sum[i] = phot['aperture_sum'] - bkg_sum
 
 ### Scaling the PSF for normalisation -- SHOULD I JUST TAKE PSF_NORM INSTEAD?
 psf_scaled = np.zeros_like(psf)
 for i in range (0,len(psf)):
     psf_scaled[i] = psf[i]/psf_final_sum[i]
 
+## SNR maps
+if snr_maps == True:
+    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=False)
+    vip_hci.fits.write_fits(snr_map_file,snrmap) # Write SNR maps to file
+
 ## Contrast curve
 if contrast_curves == True:
-    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=-105,plsc=pxscale,rad_dists=[radial_dist],theta=PA) # Remove companion using NEGFC technique
+    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=-final_sum,plsc=pxscale,rad_dists=[radial_dist],theta=PA) # Remove companion using NEGFC technique
     print("Companion removed")
     print("Computing contrast curve...")
-    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
+    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
 elif contrast_curves == False:
@@ -264,35 +204,29 @@ elif contrast_curves == False:
 if extract_spec == True:
 
     ## Define some parameters
-    f_guess_pl = 200. # Flux first guess
-    f_range_K1 = np.zeros((len(final_sum_K1),200))
-    f_range_K2 = np.zeros((len(final_sum_K2),200))
-    for i in range(0,len(star_flux_K1)):
-        f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]),10 *np.abs(final_sum_K1[i]),200)
-        f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]),10 *np.abs(final_sum_K2[i]),200)
+    comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
+    f_guess_pl = 100. # Flux first guess
+    f_range = np.linspace(0.*f_guess_pl,5 *f_guess_pl, 100)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
     simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
-    simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
-    simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
-    ## Start Simplex
-    for i in range(0,len(final_sum_K1)):
-        print("Companion index: ", i + 1) # Companions for IRDIS
-        comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
-        simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_scaled[0],ncomp_pca,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
-        simplex_guess_K2[i] = vip_hci.negfc.firstguess(cube[1],-angs,psf_scaled[1],ncomp_pca,pxscale,comp_xycoord,simplex_options=simplex_options,f_range=f_range,p_ini=p_in,verbose=False) # This takes some time
-        print("K1: ", simplex_guess_K1[i])
-        print("K2: ", simplex_guess_K2[i])
+    simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
 
-## Save the spectrum
-if save_spec == True:
-    np.savetxt(sspec_file_K1, simplex_guess_K1, delimiter='   ') # Saves to file
-    np.savetxt(sspec_file_K2, simplex_guess_K2, delimiter='   ')
+    ## Start Simplex
+    for i in range(0,len(wl)):
+        print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
+        #simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,annulus_width=3,aperture_radius=3,verbose=False,simplex=True)
+         #simplex_guess[i] = vip_hci.negfc.firstguess(x[i],-angs,psf_norm[i],ncomp_pca,pxscale,planets_xy_coord=[(127,243)],fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,verbose=False,simplex=True,annulus_width=3,aperture_radius=3)
+        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range,simplex=True,fmerit='stddev',verbose=False,plot=False,save=False) # This takes some time
+        print(simplex_guess[i])
+
+    ## Save the spectrum
+    if save_spec == True:
+        np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
+        print("Spectrum saved successfully!")
 
 # Spectrum extraction with MCMC
 if extract_mcmc == True:
-    instru= 'IRDIS36059' # Define instrument parameters
-    ann_width=annulus_width # Annulus width of MCMC
-    aperture_radius=aperture_width # Aperture radius
+    instru= 'IFS36059' # Define instrument parameters
     fig_merit='sum' # Summation figure of merit
     outpath = mcmc_path.format(source) # Path to save MCMC files
 
@@ -302,13 +236,13 @@ if extract_mcmc == True:
     for i in range(len(final_sum)): # For each wavelength channel
         initialState = simplex_guess[i] # Take r, PA and flux from simplex
         bounds=[[0.75*initialState[0],1.25*initialState[0]],[0.75*initialState[1],1.25*initialState[1]],[0.75*initialState[2],1.30*initialState[2]]] # Initiate bounds
-        output_file = source+'_IRDIS_wavelength_{}'.format(i) # Save to output file
+        output_file = source+'_IFS_wavelength_{}'.format(i) # Save to output file
 
-        chain_40 = vip.negfc.mcmc_negfc_sampling(cube[i], -angs,  psf_scaled[i], ncomp_pca, pxscale, initialState, ann_width,
-                                                 aperture_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
+        chain_40 = vip_hci.negfc.mcmc_negfc_sampling(cube[i], -angs,  psf_norm[i], ncomp_pca, pxscale, initialState, ann_width,
+                                                 aper_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
                                                  bounds=bounds, niteration_min=itermin,
                                                  niteration_limit=itermax, check_maxgap=50, nproc= ncores,
-                                                 output_file=output_file, display=True,verbose=True, save=True,
+                                                 output_file=output_file, display=True,verbosity=1, save=True,
                                                  rhat_threshold=1.01, niteration_supp=0, fmerit=fig_merit) # MCMC run per channel
     print("########## MCMC Sampling done! ##########")
 
@@ -320,7 +254,7 @@ if read_mcmc == True:
     mcmc_result={}
     outpath = mcmc_path.format(source) # Path to save MCMC files
     for i in range(0,len(wl)): # Read all channels and store them to variables
-        with open(outpath+source+'_IRDIS_wavelength_{}/MCMC_results'.format(i),'rb') as fi:
+        with open(outpath+source+'_IFS_wavelength_{}/MCMC_results'.format(i),'rb') as fi:
                 pickler["myPickler{}".format(i)] = pickle.Unpickler(fi)
                 mcmc_result["mcmc_result{}".format(i)] = pickler["myPickler{}".format(i)].load()
 
@@ -382,7 +316,7 @@ if fastwind == True:
     fast_wavel = np.array([])
     fast_flux = np.array([])
 
-    ## Loop over lines and extract variables of interest within the wavelength range of IRDIS
+    ## Loop over lines and extract variables of interest within the wavelength range of IFS
     for line in f:
         line = line.strip()
         columns = line.split()
@@ -392,11 +326,11 @@ if fastwind == True:
         if float(columns[1]) < 9300:
             break
     f.close()
-    # The flux is measured the opposite way as for IRDIS
+    # The flux is measured the opposite way as for IFS
     fast_wavel = fast_wavel[::-1]
     fast_flux = fast_flux[::-1]
 
-    ## Adjust the model spectra to the same wavelengths as IRDIS
+    ## Adjust the model spectra to the same wavelengths as IFS
     model_spectra = np.interp(wl*1e4,fast_wavel,fast_flux)
 
     ## Define some parameters
@@ -540,3 +474,43 @@ if abs_mag == True:
         print("Y absolute magnitude: " + M_comp[0] + " +/- " + M_comp_err[0])
         print("J absolute magnitude: " + M_comp[1] + " +/- " + M_comp_err[1])
         print("H absolute magnitude: " + M_comp[2] + " +/- " + M_comp_err[2])
+
+
+# Plotting
+
+## Aperture Photometry
+if plot_aper == True:
+    plt.figure(figsize=(12, 9))
+    #plt.title('Aperture Photometry IFS')
+    #plt.legend()
+    # ax.get_xaxis().tick_bottom()
+    # ax.get_yaxis().tick_left()
+    plt.ylim(0, 1.1*max(final_sum))
+    plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    #plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.3)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("Flux [ADU/s]", fontsize=20)
+    plt.xlabel('Wavelength [$\mathring{A}$]', fontsize=20)
+    plt.plot(wl*1e4, final_sum,lw=2.8)
+    plt.show()
+
+## Simplex Optim
+if plot_sspec == True:
+    simplex_flux = np.zeros_like(wl)
+    for i in range(len(wl)):
+        simplex_flux[i] = simplex_guess[i][2]
+    plt.figure(figsize=(12, 9))
+    #plt.title('Aperture Photometry IFS')
+    #plt.legend()
+    # ax.get_xaxis().tick_bottom()
+    # ax.get_yaxis().tick_left()
+    plt.ylim(0, 1.1*max(simplex_flux))
+    plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    #plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.3)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("Simplex flux [ADU/s]", fontsize=20)
+    plt.xlabel('Wavelength [$\mathring{A}$]', fontsize=20)
+    plt.plot(wl*1e4, simplex_flux,lw=2.8)
+    plt.show()
