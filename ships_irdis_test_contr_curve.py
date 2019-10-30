@@ -10,51 +10,47 @@
 # Set up your parameters
 
 ## Define images to analyse
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+cube_filepath = '/home/alan/Desktop/cube_Ab.fits'
+wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = ([501,525],[881,421],[764,857],[84,434],[418,357]) # Companion position in pixels (X,Y)
+comp_pos = ([490,456]) # Companion position in pixels (X,Y)
 psf_pos = (33, 33) # PSF position in pixels (X,Y)
-radial_dist = [ 312.6995363 ,  289.66359799,  201.68291946,   60.16643583,
-        269.09106265,  210.78899402,  240.63665556,   81.60882305,
-        440.54965668,  197.69926656,  455.10658092,  451.40225963,
-        336.65561038,  385.03246616] # Radial distance of companion in pixels
-position_angle = [327.93634992,  281.34872447,  262.59308787,  201.44773633,
-        178.50936816,   56.61148642,   35.86982352,   36.02737339] # Position angle of companion in degrees
+radial_dist = [ 59.9 ] # Radial distance of companion in pixels
+position_angle = [249.541208777] # Position angle of companion in degrees
 noise_aperture_pos_comp = (512,512) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
-noise_aperture_pos_psf = (33,33) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
 ## Do you want to see the image?
 see_cube = False # Original cube
-see_collapsed_cube = True # Collapsed cube
+see_collapsed_cube = False # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
-
+size_psf = 31
 ## PCA
-ncomp_pca = 5 # Number of principal components for PCA
+ncomp_pca = 1 # Number of principal components for PCA
 opti_pca = False # Optimise the number of PCA components?
 source = (501,525) # Source where to optimise the PCA
 
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/SNRmap_VIP.fits' # Finish the file with .fits
+snr_map_file = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Detection
-adi_frame = True # Would you like to apply ADI on the frame?
-adi_plot = True # Would you like to see the resulting plot?
+adi_frame = False # Would you like to apply ADI on the frame?
+adi_plot = False # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
 adi_max_scale = 3 # Maximum colour scale for the ADI plot
-detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+detection = False # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
 detect_sigma = 5 # What sigma limit would you like for the detection?
 
 ## Contrast curves
@@ -114,7 +110,6 @@ import __init__
 import sys
 import matplotlib
 import vip_hci
-from hciplot import plot_frames, plot_cubes
 from vip_hci.metrics.fakecomp import cube_inject_companions, frame_inject_companion, normalize_psf
 import numpy as np
 import scipy
@@ -155,10 +150,12 @@ if see_cube == True:
     ds9.display(cube[0,0])
 
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=None, verbose=False,full_output=True) # maxflux is a dummy variable
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=(32, 32), verbose=True, force=True) # Resize the PSF
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
+
 ### Plot it
 if see_psf_norm == True:
-    plot_frames(psf_norm[0], grid=True, size_factor=4)
+    plot_frames(psf_norm[1], grid=True, size_factor=4)
 
 ## Check if the cube is centred correctly by plotting
 if see_cube_centre == True:
@@ -194,14 +191,17 @@ if snr_maps == True:
 # Stellar photometry of the companion
 
 ## Collapse the images for better photometry measurement
-cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
-cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
-cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
+cube_wl_coll = np.zeros_like(cube[:,0,:,:])
+for i in range(len(wl)):
+        cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i]) # Rotate & collapse along the rotation axis - 3D image
+#cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
+# cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
+#cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
 
 ## Check the collapsed data cubes
 if see_collapsed_cube == True:
     ds9 = vip_hci.Ds9Window()
-    ds9.display(cube_wl_coll[0],cube_coll) # cube_wl_coll on the left and cube_coll on the right
+    ds9.display(cube_wl_coll[0])#,cube_coll) # cube_wl_coll on the left and cube_coll on the right
 
 ## Aperture photometry of companions and PSF
 
@@ -221,8 +221,8 @@ for i in range(0,len(wl)):
     ### Flux
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
-    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
-    psf_bkg_sum = psf_bkg_mean * aper_psf.area()
+    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area
+    psf_bkg_sum = psf_bkg_mean * aper_psf.area
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
 
 ### Aperture photometry - Companions
@@ -236,10 +236,10 @@ for i in range(0,len(radial_dist)):
     phot_noise_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_noise_comp)
     phot_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_comp_K1)
     phot_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_comp_K2)
-    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K1.area())
-    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K2.area())
-    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area()
-    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area()
+    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area-aper_comp_K1.area)
+    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area-aper_comp_K2.area)
+    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area
+    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area
     final_sum_K1[i] = phot_K1['aperture_sum'] - bkg_sum_K1
     final_sum_K2[i] = phot_K2['aperture_sum'] - bkg_sum_K2
 

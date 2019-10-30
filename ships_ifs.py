@@ -9,67 +9,103 @@
 
 # Set up your parameters
 
-## Read the user folder
-import sys
-fold = sys.argv[1] # read the folder name
-print(fold)
-
 ## Define images to analyse
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/corrected_psf.fits'
+# wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+# cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+# angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+# psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
-psf_pos = (32, 33) # PSF position in pixels (X,Y)
-radial_dist = 97. # Radial distance of companion in pixels
-position_angle = 159.  # Position angle of companion in degrees
-noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+comp_pos = (129,169) # Companion position in pixels from the center of the frame (X,Y)
+psf_pos = (33, 33) # PSF position in pixels (X,Y)
+radial_dist = 28. # Radial distance of companion in pixels
+position_angle = 121.  # Position angle of companion in degrees
+noise_aperture_pos_comp = (15,40) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
+## Do you want to see the image?
+see_cube = False # Original cube
+see_collapsed_cube = False # Collapsed cube
+see_psf_norm = False # Normalised PSF
+see_cube_centre = False # Check if the image is centered correctly
+
 ## PCA
-ncomp_pca = 1 # Number of principal components for PCA
+ncomp_pca = 0 # Number of principal components for PCA
+opti_pca = False # Optimise the number of PCA components?
+source_pca = (82.,116.) # Source where to optimise the PCA
 
 ## SNR maps
-snr_maps = True # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/SNRmap_VIP.fits' # Finish the file with .fits
+snr_maps = False # Would you like to make and save an SNR map to disk?
+snr_map_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/SNRmap_VIP11.fits' # Finish the file with .fits
 
 ## Detection
-adi_frame = True # Would you like to apply ADI on the frame?
+adi_frame = False # Would you like to apply ADI on the frame?
 adi_plot = False # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
 adi_max_scale = 1 # Maximum colour scale for the ADI plot
-detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+detection = False # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
+
 detect_sigma = 5 # What sigma limit would you like for the detection?
-save_detect = True # Save detections?
-detect_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/'+fold+'/VIP_detections.txt' # Save coordinates to file
 
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
+
+## Aperture Photometry
+plot_aper = False # Plot the aperture photometry of the detected companion?
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
 save_spec = False # Save the spectrum to ascii file
-sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
+sspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 plot_sspec = False # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
 extract_mcmc = False # Will compute the MCMC for all 39 wavelengths !! This takes ~1,5h per wavelength and is very computer intensive !!
-source = 'QZCar' # Give name for your source
-mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results will be stored
+source = 'HD93403' # Give name for your source
+mcmc_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/mcmc/' # Directory where MCMC results will be stored
 plot_mcmc = False # Plot the mcmc errors with simplex?
 
 ## Reading MCMC results
 read_mcmc = False # Do you wish to read the MCMC results?
 source = 'QZCar' # Give name for your source
-mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/new_VIP/' # Directory where MCMC results are stored
+mcmc_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/mcmc/' # Directory where MCMC results are stored
+
+## Load calibrated FASTWIND models of the central star
+fastwind = False # Use FASTWIND model spectra for the star
+fastwind_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/fastwind_model.txt' # Directory where the FASTWIND flux are
+rad_fast = 22.1 # Radius of model star
+dist_fast = 100. # Distance to consider for the flux of the calibrated spectrum in Ro
+
+## Compute calibrated spectrum of companion
+calib_spec = False # Do you wish to calibrate the spectrum of the companion?
+save_calib_spec = False # Would you like to save the calibrated spectrum & associated error?
+calib_star_spec_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/fastwind_model.txt' # Path to calibrated spectrum of central star
+sspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Path to spectrum file
+cspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/VIP_calib_spectra.txt' # Path to calibrated spectrum
+
+## Magnitude contrasts
+mag_contr = False # Do you to calculate the magnitude contrasts for your companion?
+print_mag_contr = False # Do you wish to print the magnitude contrasts to the screen?
+
+## Absolute magnitude !! Work in Progress !!
+abs_mag = False # Would you like to calculate the absolute magnitudes of your companion?
+print_abs_mag = False # Do you wish to print the absolute magnitudes to the screen?
+star_mag_Y = 5.75 # Magnitude of central star Y band
+star_mag_J = 5.551 # Magnitude of central star J band
+star_mag_H = 5.393 # Magnitude of central star H band
+star_mag_V = 6.24 # Magnitude of central star V band
+star_dist = 2300. # Distance to central star in parsec
 
 # ---------------------------------------------------------------------------
 
@@ -112,13 +148,32 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-psf = np.median(psf, axis=1) # Take the median of all PSFs
+#psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
 
+## Check the RAW data cubes
+if see_cube == True:
+    ds9 = vip_hci.Ds9Window()
+    ds9.display(cube[0,0])
+
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=31,verbose=False,full_output=True) # maxflux is a dummy variable
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=(32, 32), verbose=True, force=True) # Resize the PSF
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
+
+### Plot it
+if see_psf_norm == True:
+    plot_frames(psf_norm[0], grid=True, size_factor=10)
+
+## Check if the cube is centred correctly by plotting
+if see_cube_centre == True:
+    plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=10)
+
+## Optimise the number of PCA components
+if opti_pca == True:
+    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=(129,169),mask_center_px=None, ncomp=(1, 41, 2))
+    sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
 
 ## Detection with VIP, for now only with the first wavelength
 if adi_frame == True:
@@ -131,14 +186,10 @@ if adi_frame == True:
         plot_frames(fr_adi, vmin=adi_min_scale, vmax=adi_max_scale)
     ### Compute the detection of sources
     if detection==True:
-        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, plot=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
+        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False,plot=True) # Sigma limit provided by user
         print("Detected sources : " , "\n", detect)
         detect_pos = np.array(detect) # Converted to array in order to be used later
-        #### Save the coordinates
-        if save_detect == True:
-            np.savetxt(detect_file, detect_pos, delimiter='   ') # Saves to file
-            print("Saved to file!")
-
+        sys.exit("Sources detected. To continue, please input the target coordinates in the script and skip this process.")
 
 # Stellar photometry of the companion
 
@@ -146,6 +197,11 @@ if adi_frame == True:
 cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
 cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
 cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
+
+## Check the collapsed data cubes
+if see_collapsed_cube == True:
+    ds9 = vip_hci.Ds9Window()
+    ds9.display(cube_wl_coll[0],cube_coll) # cube_wl_coll on the left and cube_coll on the right
 
 ## Aperture photometry of companions and PSF
 
@@ -169,13 +225,13 @@ for i in range(0,wl.shape[0]):
     ### PSF
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
-    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
-    psf_bkg_sum = psf_bkg_mean * aper_psf.area()
+    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area
+    psf_bkg_sum = psf_bkg_mean * aper_psf.area
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
     ### Companion
     phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
-    bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
-    bkg_sum = bkg_mean * aper_comp.area()
+    bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area-aper_comp.area)
+    bkg_sum = bkg_mean * aper_comp.area
     final_sum[i] = phot['aperture_sum'] - bkg_sum
 
 ### Scaling the PSF for normalisation -- SHOULD I JUST TAKE PSF_NORM INSTEAD?
@@ -185,7 +241,7 @@ for i in range (0,len(psf)):
 
 ## SNR maps
 if snr_maps == True:
-    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=False)
+    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=True)
     vip_hci.fits.write_fits(snr_map_file,snrmap) # Write SNR maps to file
 
 ## Contrast curve
@@ -205,8 +261,8 @@ if extract_spec == True:
 
     ## Define some parameters
     comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
-    f_guess_pl = 100. # Flux first guess
-    f_range = np.linspace(0.*f_guess_pl,5 *f_guess_pl, 100)
+    f_guess_pl = max(final_sum) # Flux first guess as the maximum value of the flux
+    f_range = np.linspace(0.*f_guess_pl,1.5*f_guess_pl, 60)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
     simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
     simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
@@ -214,9 +270,9 @@ if extract_spec == True:
     ## Start Simplex
     for i in range(0,len(wl)):
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
-        #simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,annulus_width=3,aperture_radius=3,verbose=False,simplex=True)
-         #simplex_guess[i] = vip_hci.negfc.firstguess(x[i],-angs,psf_norm[i],ncomp_pca,pxscale,planets_xy_coord=[(127,243)],fwhm=fwhm[i],simplex_options=simplex_options,f_range=None,verbose=False,simplex=True,annulus_width=3,aperture_radius=3)
-        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_scaled[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range,simplex=True,fmerit='stddev',verbose=False,plot=False,save=False) # This takes some time
+        simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range,simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False)
+        #simplex_guess[i] = vip_hci.negfc.simplex_optim.firstguess(cube[i], -angs, psf_norm[i], ncomp=1, plsc=0.0074,fwhm=fwhm[i], annulus_width=3, aperture_radius=2, planets_xy_coord=comp_xycoord, cube_ref=None,svd_mode='lapack',f_range=f_range, simplex=True,fmerit='sum',scaling=None, simplex_options=simplex_options,collapse='median',verbose=False)
+
         print(simplex_guess[i])
 
     ## Save the spectrum
@@ -242,7 +298,7 @@ if extract_mcmc == True:
                                                  aper_radius, cube_ref=None, svd_mode='lapack', nwalkers=nwalkers,
                                                  bounds=bounds, niteration_min=itermin,
                                                  niteration_limit=itermax, check_maxgap=50, nproc= ncores,
-                                                 output_file=output_file, display=True,verbosity=1, save=True,
+                                                 output_file=output_file, display=False,verbosity=1, save=True,
                                                  rhat_threshold=1.01, niteration_supp=0, fmerit=fig_merit) # MCMC run per channel
     print("########## MCMC Sampling done! ##########")
 

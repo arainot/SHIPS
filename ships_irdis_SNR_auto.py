@@ -15,10 +15,10 @@ fold = sys.argv[1] # read the folder name
 print(fold)
 
 ## Define images to analyse
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/ird_convert_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/'+fold+'/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/'+fold+'/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/'+fold+'/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/'+fold+'/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
 comp_pos = ([501,525],[881,421],[764,857],[84,434],[418,357]) # Companion position in pixels (X,Y)
@@ -35,28 +35,22 @@ noise_aperture_pos_psf = (33,33) # Position in pixels of the circular annulus ap
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
-## Do you want to see the image?
-see_cube = False # Original cube
-see_collapsed_cube = True # Collapsed cube
-see_psf_norm = False # Normalised PSF
-see_cube_centre = False # Check if the image is centered correctly
-
 ## PCA
-ncomp_pca = 5 # Number of principal components for PCA
-opti_pca = False # Optimise the number of PCA components?
-source = (501,525) # Source where to optimise the PCA
+ncomp_pca = 1 # Number of principal components for PCA
 
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/P103_ScoOb1/IRDIS/zet01/SNRmap_VIP.fits' # Finish the file with .fits
+snr_map_file = '/home/alan/data/Backup_macbook/SPHERE/P103_ScoOb1/IRDIS/'+fold+'/SNRmap_VIP.fits' # Finish the file with .fits
 
 ## Detection
 adi_frame = True # Would you like to apply ADI on the frame?
-adi_plot = True # Would you like to see the resulting plot?
+adi_plot = False # Would you like to see the resulting plot?
 adi_min_scale = -1 # Minimum colour scale for the ADI plot
 adi_max_scale = 3 # Maximum colour scale for the ADI plot
 detection = True # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
 detect_sigma = 5 # What sigma limit would you like for the detection?
+save_detect = True # Save detections?
+detect_file = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/'+fold+'/VIP_detections.txt' # Save coordinates to file
 
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
@@ -150,25 +144,8 @@ psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
 
-## Check the RAW data cubes
-if see_cube == True:
-    ds9 = vip_hci.Ds9Window()
-    ds9.display(cube[0,0])
-
 ## Get FWHM of images & normalised PSF
 psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=None, verbose=False,full_output=True) # maxflux is a dummy variable
-### Plot it
-if see_psf_norm == True:
-    plot_frames(psf_norm[0], grid=True, size_factor=4)
-
-## Check if the cube is centred correctly by plotting
-if see_cube_centre == True:
-    plot_frames(vip_hci.preproc.frame_crop(cube[0,0], 50), grid=True, size_factor=4)
-
-## Optimise the number of PCA components
-if opti_pca == True:
-    vip_hci.pca.pca(cube[0], angs, fwhm=fwhm[0], source_xy=(501,525),mask_center_px=None, ncomp=(1, 41, 2))
-    sys.exit("PCA optimised. To continue, please input the PCA value in the script and skip this process.")
 
 ## Detection with VIP, for now only with the first wavelength
 if adi_frame == True:
@@ -181,14 +158,17 @@ if adi_frame == True:
         plot_frames(fr_adi, vmin=adi_min_scale, vmax=adi_max_scale)
     ### Compute the detection of sources
     if detection==True:
-        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False) # Sigma limit provided by user
+        detect = vip_hci.metrics.detection(fr_adi, fwhm=fwhm[0], psf=psf_norm[0], debug=False, mode='log', snr_thresh=detect_sigma,bkg_sigma=detect_sigma,matched_filter=True,vmin=adi_min_scale,vmax=adi_max_scale,verbose=False,plot=False) # Sigma limit provided by user
         print("Detected sources : " , "\n", detect)
         detect_pos = np.array(detect) # Converted to array in order to be used later
-        sys.exit("Sources detected. To continue, please input the target coordinates in the script and skip this process.")
+        #### Save the coordinates
+        if save_detect == True:
+            np.savetxt(detect_file, detect_pos, delimiter='   ') # Saves to file
+            print("Saved to file!")
 
 ## SNR maps
 if snr_maps == True:
-    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=True)
+    snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=False)
     vip_hci.fits.write_fits(snr_map_file,snrmap) # Write SNR maps to file
     sys.exit("SNR maps created. To continue, please input follow from the beginning process.")
 
@@ -198,11 +178,6 @@ if snr_maps == True:
 cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
 cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
 cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
-
-## Check the collapsed data cubes
-if see_collapsed_cube == True:
-    ds9 = vip_hci.Ds9Window()
-    ds9.display(cube_wl_coll[0],cube_coll) # cube_wl_coll on the left and cube_coll on the right
 
 ## Aperture photometry of companions and PSF
 
