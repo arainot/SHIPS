@@ -238,11 +238,27 @@ frame = array.copy()
 frame = mask_circle(frame, radius=2*fwhm)
 
 
-vip_hci.metrics.contrcurve.contrast_curve(cube, -angs, psf_norm, fwhm=fwhm[0],
-                                          pxscale=0.01225, starphot=psf_final_sum, algo=vip_hci.pca.pca, sigma=5, nbranch=5,
+vip_hci.metrics.contrcurve.contrast_curve(cube, -angs, psf_norm, fwhm=np.average(fwhm),
+                                          pxscale=0.01225, starphot=psf_final_sum, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
                                           theta=0, inner_rad=1, wedge=(0, 360), fc_snr=100,
                                           student=True, transmission=None, smooth=True,
                                           interp_order=2, plot=True, dpi=100, imlib='opencv',
                                           debug=True, verbose=True, full_output=False, save_plot=None,
-                                          object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='single',
+                                          object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='double',
                                           scale_list=wl)
+
+qzcar_comp = np.zeros((9,2))
+for i in range(0,9):
+    qzcar_comp[i][0] = contr['mag_contr']
+    qzcar_comp[i][1] = contr['mag_contr']
+
+np.savetxt('/home/alan/Desktop/dist_arcsec.txt', contr['distance_arcsec'], delimiter='   ')
+help(vip_hci.metrics.contrcurve.throughput)
+vip_hci.metrics.contrcurve.contrast_curve(cube[0], -angs, psf_norm[0], fwhm=fwhm[0],
+                                          pxscale=0.01225, starphot=1793119.1, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
+                                          theta=70, inner_rad=1, wedge=(0, 360), fc_snr=100,
+                                          student=True, transmission=None, smooth=True,
+                                          interp_order=2, plot=True, dpi=100, imlib='opencv',
+                                          debug=True, verbose=True, full_output=False, save_plot=None,
+                                          object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='single',
+                                          scale_list=wl[0])
