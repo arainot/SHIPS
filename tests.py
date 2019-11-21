@@ -207,25 +207,56 @@ for i in range(0,2):
     c[i] = vip_hci.pca.utils_pca.pca_annulus(cube[i], -angs, 1, 20, 384)
 plot_frames(c[0,0], size_factor=10, vmin=-1, vmax=1)
 
-r = np.array([])
-theta = np.array([])
-f = np.array([])
-with open('/home/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/summary_companions.txt') as f:
+r_K1 = np.array([])
+theta_K1 = np.array([])
+f_K1 = np.array([])
+r_K2 = np.array([])
+theta_K2 = np.array([])
+f_K2 = np.array([])
+with open('/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/summary_companions.txt') as f:
     header1 = f.readline()
     for line in f:
         line = line.strip()
         columns = line.split()
-        r = np.append(r,float(columns[2]))
-        theta = np.append(theta,float(columns[3])+90)
-        f = np.append(f,float(columns[4]))
-flux = np.zeros_like(r)
-c= np.zeros_like(cube)
-for i in range(len(f)):
-    if i > 0:
-        flux[i-1] = f[i]
-c[0]=vip_hci.negfc.cube_planet_free(([r,theta,flux]),cube[0],-angs,psf_norm[0],plsc=0.012, imlib='opencv', interpolation='lanczos4')
-c[1]=vip_hci.negfc.cube_planet_free(([r,theta,flux]),cube[1],-angs,psf_norm[1],plsc=0.012, imlib='opencv', interpolation='lanczos4')
+        r_K1 = np.append(r_K1,float(columns[2]))
+        theta_K1 = np.append(theta_K1,float(columns[3])+90)
+        f_K1 = np.append(f_K1,float(columns[4]))
+f.close
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt') as f:
+    header1 = f.readline()
+    header2 = f.readline()
+    header3 = f.readline()
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        r_K2 = np.append(r_K2,float(columns[0]))
+        theta_K2 = np.append(theta_K2,float(columns[1]))
+        f_K2 = np.append(f_K2,float(columns[2]))
+f.close
+for i in range(len(r_K1)-2):
+    if i==0:
+        c[0]=vip_hci.negfc.cube_planet_free([(r_K1[i],theta_K1[i],f_K1[i])],cube[0],-angs,psf_norm[0],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+    else:
+        c[0]=vip_hci.negfc.cube_planet_free([(r_K1[i],theta_K1[i],f_K1[i])],c[0],-angs,psf_norm[0],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+for i in range(len(r_K2)-2):
+    if i==0:
+        c[1]=vip_hci.negfc.cube_planet_free([(r_K2[i],theta_K2[i],f_K2[i])],cube[1],-angs,psf_norm[1],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+    else:
+        c[1]=vip_hci.negfc.cube_planet_free([(r_K2[i],theta_K2[i],f_K2[i])],c[1],-angs,psf_norm[1],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
 vip_hci.fits.write_fits("/home/alan/Desktop/test2.fits",c)
+vip_hci.hci_postproc.median_sub(c[0],-angs,fwhm=fwhm[0],verbose=False)
+
+c_E = np.zeros_like(c)
+r_K1 = [2.1109824803199433063e+02]
+theta_K1 = [3.387762229578338804e+01]
+f_K1 = 2.781458963416393090e+03
+r_K2 = 2.099286977127382556e+02
+theta_K2 = 3.381478951572226777e+01
+f_K2 = 1.651526386738957626e+03
+c_E[0]=vip_hci.negfc.cube_planet_free([(r_K1,theta_K1,f_K1)],c[0],-angs,psf_norm[0],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+c_E[1]=vip_hci.negfc.cube_planet_free([(r_K2,theta_K2,f_K2)],c[1],-angs,psf_norm[1],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+t=vip_hci.hci_postproc.median_sub(c_E[1],-angs,fwhm=fwhm[1],verbose=False)
+ds9.display(t)
 
 contrcurve = vip_hci.metrics.contrast_curve(cube,-angs,psf_norm,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
           dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
@@ -245,14 +276,16 @@ vip_hci.metrics.contrcurve.contrast_curve(cube, -angs, psf_norm, fwhm=np.average
                                           interp_order=2, plot=True, dpi=100, imlib='opencv',
                                           debug=True, verbose=True, full_output=False, save_plot=None,
                                           object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='double',
-                                          scale_list=wl)
+                                          scale_list=wl/wl[1])
 
 qzcar_comp = np.zeros((9,2))
 for i in range(0,9):
     qzcar_comp[i][0] = contr['mag_contr']
     qzcar_comp[i][1] = contr['mag_contr']
+np.savetxt('/home/alan/Desktop/dist_arcsec_K1.txt', contr['distance_arcsec'], delimiter='   ')
+np.savetxt('/home/alan/Desktop/mag_contr_K1.txt', contr['mag_contr'], delimiter='   ')
+np.savetxt('/home/alan/Desktop/mag_contr_K1.txt', contr['mag_contr'], delimiter='   ')
 
-np.savetxt('/home/alan/Desktop/dist_arcsec.txt', contr['distance_arcsec'], delimiter='   ')
 help(vip_hci.metrics.contrcurve.throughput)
 vip_hci.metrics.contrcurve.contrast_curve(cube[0], -angs, psf_norm[0], fwhm=fwhm[0],
                                           pxscale=0.01225, starphot=1793119.1, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
@@ -262,3 +295,87 @@ vip_hci.metrics.contrcurve.contrast_curve(cube[0], -angs, psf_norm[0], fwhm=fwhm
                                           debug=True, verbose=True, full_output=False, save_plot=None,
                                           object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='single',
                                           scale_list=wl[0])
+
+K1 = np.array([])
+K1K2 = np.array([])
+with open('/Users/alan/Downloads/K1K2Julia.txt') as f:
+    header1 = f.readline()
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        K1 = np.append(K1,float(columns[0]))
+        K1K2 = np.append(K1K2,float(columns[1]))
+
+comp_xycoord = [[comp_pos[4][0],comp_pos[4][1]]] # Companion coords
+simplex_guess_K1[4] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[4],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False)
+
+centy, centx = vip_hci.var.frame_center(cube_cropped[0])
+posy = r_0 * np.sin(np.deg2rad(theta_0)) + centy
+posx = r_0 * np.cos(np.deg2rad(theta_0)) + centx
+print(posx, posy)
+
+## Error estimation
+r_0 = 3.348005259871553108e+02
+theta_0 = 3.563192999646838643e+02
+flux_0 = 1.628276521912207642e+01
+centy, centx = vip_hci.var.frame_center(cube[0,0])
+n_samples=15
+
+theta_inj= np.zeros(n_samples)
+r_inj=np.zeros(n_samples)
+for j in range(0,n_samples):
+   r_inj[j]=r_0
+   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_0-360.
+
+
+spectra_mes_K1 = np.zeros(len(r_inj))
+theta_mes_K1= np.zeros_like(theta_inj)
+r_mes_K1= np.zeros_like(r_inj)
+spectra_mes_K2 = np.zeros(len(r_inj))
+theta_mes_K2= np.zeros_like(theta_inj)
+r_mes_K2= np.zeros_like(r_inj)
+
+for j in range(0,n_samples):
+    print('Companion injection: ', j)
+    posy = r_inj[j] * np.sin(np.deg2rad(theta_inj[j])) + centy
+    posx = r_inj[j] * np.cos(np.deg2rad(theta_inj[j])) + centx
+
+    cube_inj=vip_hci.metrics.cube_inject_companions(cube, psf_norm, -angs, flevel=flux_0, plsc=0.0074,
+                                                   rad_dists=r_inj[j], n_branches=1, theta=theta_inj[j],
+                                                   imlib='opencv', interpolation='lanczos4', verbose=False)
+    planet_xycoord = np.array([[posx,posy]])
+    fake_comp_K1 = vip_hci.negfc.simplex_optim.firstguess(cube_inj[0], -angs, psf_norm[0], ncomp=1, plsc=0.01225,
+                                                      fwhm=fwhm[0], annulus_width=3, aperture_radius=3,
+                                                      planets_xy_coord=planet_xycoord, cube_ref=None,
+                                                      svd_mode='lapack',f_range=f_range_K1[11], simplex=True,
+                                                      fmerit='sum',scaling=None, simplex_options=simplex_options,
+                                                      collapse='median',verbose=False)
+
+    fake_comp_K2 = vip_hci.negfc.simplex_optim.firstguess(cube_inj[1], -angs, psf_norm[1], ncomp=1, plsc=0.01225,
+                                                      fwhm=fwhm[1], annulus_width=3, aperture_radius=3,
+                                                      planets_xy_coord=planet_xycoord, cube_ref=None,
+                                                      svd_mode='lapack',f_range=f_range_K2[11], simplex=True,
+                                                      fmerit='sum',scaling=None, simplex_options=simplex_options,
+                                                      collapse='median',verbose=False)
+
+    r_mes_K1[j] = fake_comp_K1[0]
+    theta_mes_K1[j] = fake_comp_K1[1]
+    spectra_mes_K1[j] = fake_comp_K1[2]
+    r_mes_K2[j] = fake_comp_K2[0]
+    theta_mes_K2[j] = fake_comp_K2[1]
+    spectra_mes_K2[j] = fake_comp_K2[2]
+
+flux_K1 = 1.628276521912207642e+01
+flux_K2 = 1.612386556716450059e+01
+std_flux_K1=np.zeros_like(wl)
+std_flux_corr_K1=np.zeros_like(wl)
+std_r_K1=np.sqrt(np.sum(abs(r_inj - r_mes_K1)**2)/(n_samples-1))
+std_theta_K1=np.sqrt(np.sum(abs(theta_inj - theta_mes_K1)**2)(n_samples-1))
+std_flux_K1=np.sqrt(np.sum(abs(spectra_mes_K1 - flux_K1)**2)(n_samples-1))
+std_flux_K2=np.zeros_like(wl)
+std_flux_corr_K2=np.zeros_like(wl)
+std_r_K2=np.sqrt(np.sum(abs(r_inj - r_mes_K2)**2)(n_samples-1))
+std_theta_K2=np.sqrt(np.sum(abs(theta_inj - theta_mes_K2)**2)(n_samples-1))
+std_flux_K2=np.sqrt(np.sum(abs(spectra_mes_K2 - flux_K2)**2)(n_samples-1))
+
+print(std_r_K1)

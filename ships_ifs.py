@@ -10,10 +10,10 @@
 # Set up your parameters
 
 ## Define images to analyse
-cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/corrected_psf.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
 # wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 # cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
 # angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
@@ -33,7 +33,7 @@ ncores = 4 # Number of cores you are willing to share for the computation
 
 ## Do you want to see the image?
 see_cube = False # Original cube
-see_collapsed_cube = False # Collapsed cube
+see_collapsed_cube = True # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
 
@@ -194,14 +194,18 @@ if adi_frame == True:
 # Stellar photometry of the companion
 
 ## Collapse the images for better photometry measurement
+# cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
+# cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
+# cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
+cube_wl_coll = np.zeros_like(cube[:,0,:,:])
+for i in range(len(wl)):
+        cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
 cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
-cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
-cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
 
 ## Check the collapsed data cubes
 if see_collapsed_cube == True:
     ds9 = vip_hci.Ds9Window()
-    ds9.display(cube_wl_coll[0],cube_coll) # cube_wl_coll on the left and cube_coll on the right
+    ds9.display(cube_wl_coll[0]) # cube_wl_coll on the left and cube_coll on the right
 
 ## Aperture photometry of companions and PSF
 
@@ -225,13 +229,13 @@ for i in range(0,wl.shape[0]):
     ### PSF
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
-    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area
-    psf_bkg_sum = psf_bkg_mean * aper_psf.area
+    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
+    psf_bkg_sum = psf_bkg_mean * aper_psf.area()
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
     ### Companion
     phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
-    bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area-aper_comp.area)
-    bkg_sum = bkg_mean * aper_comp.area
+    bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
+    bkg_sum = bkg_mean * aper_comp.area()
     final_sum[i] = phot['aperture_sum'] - bkg_sum
 
 ### Scaling the PSF for normalisation -- SHOULD I JUST TAKE PSF_NORM INSTEAD?
