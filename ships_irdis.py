@@ -11,6 +11,7 @@
 
 ## Define images to analyse
 cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+cube_filepath = '/Users/alan/Desktop/cube_free_E.fits'
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
@@ -271,14 +272,14 @@ if extract_spec == True:
     f_range_K1 = np.zeros((len(final_sum_K1),200))
     f_range_K2 = np.zeros((len(final_sum_K2),200))
     for i in range(0,len(final_sum_K1)):
-        f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]),5 *np.abs(final_sum_K1[i]),200)
-        f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]),5 *np.abs(final_sum_K2[i]),200)
+        f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]), 30*np.abs(final_sum_K1[i]),200)
+        f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]), 30*np.abs(final_sum_K2[i]),200)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
     simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
     simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
     simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
     ## Start Simplex
-    for i in range(7,11):#len(final_sum_K1)):
+    for i in range(5,7):#len(final_sum_K1)):
         print("Companion index: ", i + 1) # Companions for IRDIS
         comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
         simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
@@ -322,7 +323,7 @@ if read_mcmc == True:
     pickler={}
     mcmc_result={}
     outpath = mcmc_path.format(source) # Path to save MCMC files
-    for i in range(1,3): # Read all channels and store them to variables
+    for i in range(0,3): # Read all channels and store them to variables
         with open(outpath+source+'K1_IRDIS_companion_S{}/MCMC_results'.format(i),'rb') as fi:
                 pickler["myPickler{}".format(i)] = pickle.Unpickler(fi)
                 mcmc_result["mcmc_result{}".format(i)] = pickler["myPickler{}".format(i)].load()

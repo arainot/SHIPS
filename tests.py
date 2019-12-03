@@ -163,21 +163,30 @@ vip_hci.metrics.throughput(cube, -angs, psf, fwhm, pxscale,
                         wedge=(0,360), fc_snr=100, full_output=True,
                         algo=vip_hci.pca.pca, imlib='opencv', verbose=True)
 
-f = open('/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/VIP_simplex.txt','r')
-i=0
-simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
+f = open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt','r')
+
+simplex_guess = np.zeros((19,3)) # Set the simplex variable: r, PA, flux
+contr_spectra = np.zeros((19))
 #simplex_guess = np.array([]) # Set the simplex variable: r, PA, flux
 j=0
 for line in f:
     line = line.strip()
     columns = line.split()
-    #print(float(columns[1]))
     simplex_guess[j][0] = float(columns[0])
     simplex_guess[j][1] = float(columns[1])
     simplex_guess[j][2] = float(columns[2])
     j+=1
-print(simplex_guess)
+#print(simplex_guess)
 f.close()
+
+## Define some stored parameters
+dmag = np.zeros(19)
+
+for i in range(len(dmag)-2):
+    contr_spectra = simplex_guess[i][2]/psf_final_sum[1]
+    dmag[i] = -2.5*mh.log10(contr_spectra)
+    print("contrast magnitude: ", dmag[i])
+
 
 fk1 = 2155.994034403564
 fk2 = 1482.5920012322508
@@ -206,6 +215,27 @@ res_der = np.zeros_like(cube)
 for i in range(0,2):
     c[i] = vip_hci.pca.utils_pca.pca_annulus(cube[i], -angs, 1, 20, 384)
 plot_frames(c[0,0], size_factor=10, vmin=-1, vmax=1)
+
+r = np.array([])
+theta = np.array([])
+f = np.array([])
+flux = np.array([])
+c = np.zeros_like(cube)
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt') as f:
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        r = np.append(r,float(columns[0]))
+        theta = np.append(theta,float(columns[1]))
+        f = np.append(f,float(columns[2]))
+
+for i in range(len(f)):
+    flux=np.append(flux,f[i+1])
+
+for i in range(len(r)):
+    c[i]=vip_hci.negfc.cube_planet_free([(r[i]-1,theta[i]-0.6,flux[i])],cube[i],-angs,psf_norm[i],plsc=0.0075, imlib='opencv', interpolation='lanczos4')
+d = vip_hci.hci_postproc.median_sub(c[0],-angs,fwhm=fwhm[0],verbose=False)
+ds9.display(d)
 
 r_K1 = np.array([])
 theta_K1 = np.array([])
@@ -246,6 +276,13 @@ for i in range(len(r_K2)-2):
 vip_hci.fits.write_fits("/home/alan/Desktop/test2.fits",c)
 vip_hci.hci_postproc.median_sub(c[0],-angs,fwhm=fwhm[0],verbose=False)
 
+c = np.zeros_like(cube)
+c[0]=vip_hci.negfc.cube_planet_free([(2.100067681452761690e+02,3.378271377905575434e+01,2.605832969178423355e+03)],cube[0],-angs,psf_norm[0],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+c[1]=vip_hci.negfc.cube_planet_free([(2.099282631149717986e+02,3.381485450865740461e+01,1.651860225089150845e+03)],cube[1],-angs,psf_norm[1],plsc=0.01225, imlib='opencv', interpolation='lanczos4')
+vip_hci.fits.write_fits("/Users/alan/Desktop/cube_free_Ad.fits",c)
+t=vip_hci.hci_postproc.median_sub(c[1],-angs,fwhm=fwhm[1],verbose=False)
+ds9.display(t)
+
 c_E = np.zeros_like(c)
 r_K1 = [2.1109824803199433063e+02]
 theta_K1 = [3.387762229578338804e+01]
@@ -282,8 +319,8 @@ qzcar_comp = np.zeros((9,2))
 for i in range(0,9):
     qzcar_comp[i][0] = contr['mag_contr']
     qzcar_comp[i][1] = contr['mag_contr']
-np.savetxt('/home/alan/Desktop/dist_arcsec_K1.txt', contr['distance_arcsec'], delimiter='   ')
-np.savetxt('/home/alan/Desktop/mag_contr_K1.txt', contr['mag_contr'], delimiter='   ')
+np.savetxt('/home/alan/Desktop/dist_arcsec_K2.txt', contr['distance_arcsec'], delimiter='   ')
+np.savetxt('/home/alan/Desktop/mag_contr_K2.txt', contr['mag_contr'], delimiter='   ')
 np.savetxt('/home/alan/Desktop/mag_contr_K1.txt', contr['mag_contr'], delimiter='   ')
 
 help(vip_hci.metrics.contrcurve.throughput)
@@ -315,11 +352,11 @@ posx = r_0 * np.cos(np.deg2rad(theta_0)) + centx
 print(posx, posy)
 
 ## Error estimation
-r_0 = 3.348005259871553108e+02
-theta_0 = 3.563192999646838643e+02
-flux_0 = 1.628276521912207642e+01
+r_0 = 4.774963433391237118e+02
+theta_0 = 1.938721520342480176e+02
+flux_0 = 1.859074952441568129e+01
 centy, centx = vip_hci.var.frame_center(cube[0,0])
-n_samples=15
+n_samples=5
 
 theta_inj= np.zeros(n_samples)
 r_inj=np.zeros(n_samples)
@@ -344,6 +381,7 @@ for j in range(0,n_samples):
                                                    rad_dists=r_inj[j], n_branches=1, theta=theta_inj[j],
                                                    imlib='opencv', interpolation='lanczos4', verbose=False)
     planet_xycoord = np.array([[posx,posy]])
+    print("success")
     fake_comp_K1 = vip_hci.negfc.simplex_optim.firstguess(cube_inj[0], -angs, psf_norm[0], ncomp=1, plsc=0.01225,
                                                       fwhm=fwhm[0], annulus_width=3, aperture_radius=3,
                                                       planets_xy_coord=planet_xycoord, cube_ref=None,
@@ -365,8 +403,8 @@ for j in range(0,n_samples):
     theta_mes_K2[j] = fake_comp_K2[1]
     spectra_mes_K2[j] = fake_comp_K2[2]
 
-flux_K1 = 1.628276521912207642e+01
-flux_K2 = 1.612386556716450059e+01
+flux_K1 = 1.859074952441568129e+01
+flux_K2 = 1.233757488348718212e+01
 std_flux_K1=np.zeros_like(wl)
 std_flux_corr_K1=np.zeros_like(wl)
 std_r_K1=np.sqrt(np.sum(abs(r_inj - r_mes_K1)**2)/(n_samples-1))
@@ -379,3 +417,41 @@ std_theta_K2=np.sqrt(np.sum(abs(theta_inj - theta_mes_K2)**2)(n_samples-1))
 std_flux_K2=np.sqrt(np.sum(abs(spectra_mes_K2 - flux_K2)**2)(n_samples-1))
 
 print(std_r_K1)
+
+## Read MCMC
+import pickle # Import important MCMC libraries
+from pickle import Pickler
+pickler={}
+mcmc_result={}
+for i in range(0,2): # Read all channels and store them to variables
+    with open('/home/alan/midwork/python/ships/results/QZCarK1_IRDIS_companions_S{}/MCMC_results'.format(i),'rb') as fi:
+            pickler["myPickler{}".format(i)] = pickle.Unpickler(fi)
+            mcmc_result["mcmc_result{}".format(i)] = pickler["myPickler{}".format(i)].load()
+
+## Create variable to store MCMC results
+final_pos = []
+final_PA = []
+final_contr = []
+final_pos_gauss = []
+final_PA_gauss = []
+final_contr_gauss = []
+
+## Obtain r, PA, flux and error values
+for i in range(0,2):
+    mcmc = mcmc_result["mcmc_result{}".format(i)]
+    chain_40 = mcmc['chain']
+    index = np.where(mcmc['AR']>0.4)
+    print('Companion number: ', i)
+
+    burnin = 0.3
+    chain_40_g = chain_40[index]
+
+    isamples_flat = chain_40_g[:,int(chain_40_g.shape[1]//(1/burnin)):,:].reshape((-1,3))
+    mu,sigma = vip_hci.negfc.mcmc_sampling.confidence(isamples_flat,
+                                                                    cfd = 68,
+                                                                    gaussian_fit = True,
+                                                                    verbose=True,
+                                                                    save=False,
+                                                                    full_output=False,
+                                                                    title=source,
+                                                                    edgecolor = 'm',facecolor = 'b',range=())
