@@ -1,10 +1,6 @@
 SHIPS - SPHERE High-contrast Imaging Pipeline for massive Stars (Under Active Development)
 =====================================
 
-Attribution
-------------
-
-
 Introduction
 -------------
 
