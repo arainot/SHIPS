@@ -1,7 +1,7 @@
 ############################
-# Date: 08/08/2019
-# Title: Running script for SHIPS for IRDIS data
-# Description: Use this script to run SHIPS for IRDIS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
+# Date: 07/08/2019
+# Title: Running script for SHIPS for IFS data
+# Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
 # VIP version: 0.9.11 (Rainot edit.)
 # pyKLIP version: 1.1 NOT IMPLEMENTED YET
 # Python version: 3 ONLY
@@ -10,34 +10,30 @@
 # Set up your parameters
 
 ## Define images to analyse
-cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
 
 ## Photometry
-comp_pos = ([491,456],[559,579],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[519,243],[227,569],[346,778],[847,491],[899,507],[72,533],[819,180],[451,60],[49,396],[732,44],[648,16]) # Companion position in pixels (X,Y)
+comp_pos = (129,169) # Companion position in pixels from the center of the frame (X,Y)
 psf_pos = (33, 33) # PSF position in pixels (X,Y)
-radial_dist = [60.16643583,81.60882305,210.78899402,197.121377136,201.68291946,211,219.,240.63665556,269.09106265,290.11,313.16,334.845228417,384.760748992,442.00180288,451.91383567,456.697517309,477.277760379,515.37656136072,515.7130985344468] # Radial distance of companion in pixels
-position_angle = [295.9,311.8] # Position angle of companion in degrees
-noise_aperture_pos_comp = (512,512) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+radial_dist = 28. # Radial distance of companion in pixels
+position_angle = 121.  # Position angle of companion in degrees
+noise_aperture_pos_comp = (15,40) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
-size_psf = 31
 ## PCA
 ncomp_pca = 1 # Number of principal components for PCA
 opti_pca = False # Optimise the number of PCA components?
-source = (501,525) # Source where to optimise the PCA
+source_pca = (82.,116.) # Source where to optimise the PCA
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
-extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
 
@@ -82,7 +78,7 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-psf = np.median(psf, axis=1) # Take the median value of all psf observations
+#psf = np.median(psf, axis=1) # Take the median value of all psf observations
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
@@ -97,7 +93,7 @@ psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size
 cube_wl_coll = np.zeros_like(cube[:,0,:,:])
 for i in range(len(wl)):
         cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
-cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
+#cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
 # cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
 #cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
 
@@ -106,153 +102,151 @@ cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the
 ### Define photometry
 noise_phot = np.zeros_like(wl) #Noise photometry
 psf_final_sum = np.zeros_like(wl) #PSF photometry
-final_sum_K1 = np.zeros_like(radial_dist) #Companion photometry in the K1 band
-final_sum_K2 = np.zeros_like(radial_dist) #Companion photometry in the K2 band
+final_sum = np.zeros_like(wl) #Companion photometry
 
 ### Apertures
+aper_noise_comp = photutils.CircularAnnulus((145,145),noise_aperture_pos_comp[0],noise_aperture_pos_comp[1])
 aper_noise_psf = photutils.CircularAnnulus(psf_pos,noise_aperture_pos_psf[0],noise_aperture_pos_psf[1])
 
-### Aperture photometry - PSF
-for i in range(0,len(wl)):
-    ### Aperture
+### Aperture photometry
+for i in range(0,wl.shape[0]):
+    ### Apertures dependent on channel
+    aper_comp = photutils.CircularAperture(comp_pos, 1./2*fwhm[i])
     aper_psf = photutils.CircularAperture(psf_pos, 1./2*fwhm[i])
-    ### Flux
+    ### Noise
+    phot_noise = photutils.aperture_photometry(cube_wl_coll[i], aper_noise_comp)
+    noise_phot[i] = np.array(phot_noise['aperture_sum'])
+    ### PSF
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
-    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area
-    psf_bkg_sum = psf_bkg_mean * aper_psf.area
+    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
+    psf_bkg_sum = psf_bkg_mean * aper_psf.area()
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
-
-### Aperture photometry - Companions
-for i in range(0,len(radial_dist)):
-    ### Apertures dependent on companions
-    aper_noise_comp = photutils.CircularAnnulus((512,512),radial_dist[i]-5,radial_dist[i]+5)
-    aper_comp_K1 = photutils.CircularAperture((comp_pos[i][0], comp_pos[i][1]),1./2*fwhm[0])
-    aper_comp_K2 = photutils.CircularAperture((comp_pos[i][0], comp_pos[i][1]),1./2*fwhm[1])
-    ### Flux
-    phot_noise_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_noise_comp)
-    phot_noise_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_noise_comp)
-    phot_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_comp_K1)
-    phot_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_comp_K2)
-    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area-aper_comp_K1.area)
-    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area-aper_comp_K2.area)
-    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area
-    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area
-    final_sum_K1[i] = phot_K1['aperture_sum'] - bkg_sum_K1
-    final_sum_K2[i] = phot_K2['aperture_sum'] - bkg_sum_K2
-
-### Scaling the PSF for normalisation -- SHOULD I JUST TAKE PSF_NORM INSTEAD?
-psf_scaled = np.zeros_like(psf)
-for i in range (0,len(psf)):
-    psf_scaled[i] = psf[i]/psf_final_sum[i]
+    ### Companion
+    phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
+    bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
+    bkg_sum = bkg_mean * aper_comp.area()
+    final_sum[i] = phot['aperture_sum'] - bkg_sum
 
 # Spectrum extraction with NM
-if extract_spec == True:
 
-    ## Define some parameters
-    f_guess_pl = max(final_sum_K1) # Flux first guess
-    f_range_K1 = np.zeros((len(final_sum_K1),200))
-    f_range_K2 = np.zeros((len(final_sum_K2),200))
-    for i in range(0,len(final_sum_K1)):
-        f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]),5 *np.abs(final_sum_K1[i]),200)
-        f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]),5 *np.abs(final_sum_K2[i]),200)
+## Define some parameters
+comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
+f_guess_pl = max(final_sum) # Flux first guess as the maximum value of the flux
+f_range = np.linspace(0.1*f_guess_pl,50*f_guess_pl, 200)
+p_in = np.array([radial_dist,PA]) # Regroup companion positions
+simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
+simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
 
-r_K1 = np.array([])
-theta_K1 = np.array([])
-f_K1 = np.array([])
-r_K2 = np.array([])
-theta_K2 = np.array([])
-f_K2 = np.array([])
-std_r_K1 = np.zeros_like(final_sum_K1)
-std_theta_K1 = np.zeros_like(final_sum_K1)
-std_flux_K1 = np.zeros_like(final_sum_K1)
-std_r_K2 = np.zeros_like(final_sum_K1)
-std_theta_K2 = np.zeros_like(final_sum_K1)
-std_flux_K2 = np.zeros_like(final_sum_K1)
+r = np.array([])
+theta = np.array([])
+f = np.array([])
+std_r = np.zeros_like(final_sum)
+std_theta = np.zeros_like(final_sum)
+std_flux = np.zeros_like(final_sum)
 
-with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K1.txt') as f:
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt') as f:
     header1 = f.readline()
     for line in f:
         line = line.strip()
         columns = line.split()
-        r_K1 = np.append(r_K1,float(columns[0]))
-        theta_K1 = np.append(theta_K1,float(columns[1]))
-        f_K1 = np.append(f_K1,float(columns[2]))
-f.close
-with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt') as f:
-    header1 = f.readline()
-    header2 = f.readline()
-    header3 = f.readline()
-    for line in f:
-        line = line.strip()
-        columns = line.split()
-        r_K2 = np.append(r_K2,float(columns[0]))
-        theta_K2 = np.append(theta_K2,float(columns[1]))
-        f_K2 = np.append(f_K2,float(columns[2]))
-f.close
+        r = np.append(r,float(columns[0]))
+        theta = np.append(theta,float(columns[1]))
+        f = np.append(f,float(columns[2]))
 
 ## Error estimation
 simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
 centy, centx = vip_hci.var.frame_center(cube[0,0])
 n_samples=20
 
-for i in range(len(r_K1)-3):
-    theta_inj= np.zeros(n_samples)
-    r_inj=np.zeros(n_samples)
-    for j in range(0,n_samples):
-       r_inj[j]=r_K1[i]
-       theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_K1[i]-360.
+theta_inj= np.zeros(n_samples)
+r_inj=np.zeros(n_samples)
+for j in range(0,n_samples):
+   r_inj[j]=r_0
+   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_0
 
+for j in range(0,n_samples):
+   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta[i]-360.
+   posy = r_inj[j] * np.sin(np.deg2rad(theta_inj[j])) + centy
+   posx = r_inj[j] * np.cos(np.deg2rad(theta_inj[j])) + centx
+   spectra_mes = np.zeros((n_samples,len(wl)))
+   theta_mes = np.zeros((n_samples,len(wl)))
+   r_mes= np.zeros((n_samples,len(wl)))
+   fake_comp = np.zeros_like(wl)
 
-    spectra_mes_K1 = np.zeros(len(r_inj))
-    theta_mes_K1= np.zeros_like(theta_inj)
-    r_mes_K1= np.zeros_like(r_inj)
-    spectra_mes_K2 = np.zeros(len(r_inj))
-    theta_mes_K2= np.zeros_like(theta_inj)
-    r_mes_K2= np.zeros_like(r_inj)
+   for i in range(len(r)):
 
-    for j in range(0,n_samples):
-        posy = r_inj[j] * np.sin(np.deg2rad(theta_inj[j])) + centy
-        posx = r_inj[j] * np.cos(np.deg2rad(theta_inj[j])) + centx
+      theta_inj=(j+1)*(360./(n_samples+1.))+theta[i]-360.
+      posy = r_inj * np.sin(np.deg2rad(theta_inj)) + centy
+      posx = r_inj[i] * np.cos(np.deg2rad(theta_inj)) + centx
+      planet_xycoord = np.array([[posx,posy]])
 
-        cube_inj=vip_hci.metrics.cube_inject_companions(cube, psf_norm, -angs, flevel=f_K1[i], plsc=0.0074,
-                                                       rad_dists=r_inj[j], n_branches=1, theta=theta_inj[j],
+      cube_inj=vip_hci.metrics.cube_inject_companions(cube[i], psf_norm[i], -angs, flevel=f[i], plsc=0.0074,
+                                                       rad_dists=r_inj[i], n_branches=1, theta=theta_inj,
                                                        imlib='opencv', interpolation='lanczos4', verbose=False)
-        planet_xycoord = np.array([[posx,posy]])
-        fake_comp_K1 = vip_hci.negfc.simplex_optim.firstguess(cube_inj[0], -angs, psf_norm[0], ncomp=1, plsc=0.01225,
-                                                          fwhm=fwhm[0], annulus_width=3, aperture_radius=3,
+
+      fake_comp[i] = vip_hci.negfc.simplex_optim.firstguess(cube_inj, -angs, psf_norm[i], ncomp=1, plsc=0.0074,
+                                                      fwhm=fwhm[i], annulus_width=3, aperture_radius=3,
+                                                      planets_xy_coord=planet_xycoord, cube_ref=None,
+                                                      svd_mode='lapack',f_range=f_range[i], simplex=True,
+                                                      fmerit='sum',scaling=None, simplex_options=simplex_options,
+                                                      collapse='median',verbose=False)
+
+    r_mes[j] = fake_comp[:,0,0]
+    theta_mes[j] = fake_comp[0,:,0]
+    spectra_mes[j] = fake_comp[0,0,:]
+
+    std_r[i]=np.sqrt(np.sum(abs(r_inj - r_mes)**2)/(n_samples-1))
+    std_theta[i]=np.sqrt(np.sum(abs(theta_inj - theta_mes)**2)/(n_samples-1))
+    std_flux[i]=np.sqrt(np.sum(abs(spectra_mes_K1 - f[i])**2)/(n_samples-1))
+
+print('companion r_0, theta_0: ', r_0, theta_0)
+centy, centx = vip_hci.var.frame_center(cube_cropped[0])
+n_samples=15
+
+theta_inj= np.zeros(n_samples)
+r_inj=np.zeros(n_samples)
+for j in range(0,n_samples):
+   r_inj[j]=r_0
+   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_0
+
+
+spectra_mes = np.zeros(shape=(len(wl),len(r_inj)))
+theta_mes= np.zeros_like(theta_inj)
+r_mes= np.zeros_like(r_inj)
+
+for j in range(0,n_samples):
+   posy = r_inj[j] * np.sin(np.deg2rad(theta_inj[j])) + centy
+   posx = r_inj[j] * np.cos(np.deg2rad(theta_inj[j])) + centx
+   print('Fake companion #: ', j+1)
+   print('r, theta, = ',r_inj[j], theta_inj[j])
+
+   cube_inj=vip_hci.metrics.cube_inject_companions(cube, psf_norm, -angs, flevel=f, plsc=0.0074,
+                                                   rad_dists=r_inj[j], n_branches=1, theta=theta_inj[j],
+                                                   imlib='opencv', interpolation='lanczos4', verbose=False)
+
+   for i in range(0,len(w_lambda)):
+       planet_xycoord = np.array([[posx,posy]])
+       fake_comp = vip_hci.negfc.simplex_optim.firstguess(cube_inj[i], -angs, psf_norm[i], ncomp=1, plsc=0.0074,
+                                                          fwhm=fwhm[i], annulus_width=3, aperture_radius=2,
                                                           planets_xy_coord=planet_xycoord, cube_ref=None,
-                                                          svd_mode='lapack',f_range=f_range_K1[i], simplex=True,
+                                                          svd_mode='lapack',f_range=f_range, simplex=True,
                                                           fmerit='sum',scaling=None, simplex_options=simplex_options,
                                                           collapse='median',verbose=False)
+       r_mes[j] = fake_comp[0]
+       theta_mes[j] = fake_comp[1]
+       spectra_mes[i,j] = fake_comp[2]
 
-        fake_comp_K2 = vip_hci.negfc.simplex_optim.firstguess(cube_inj[1], -angs, psf_norm[1], ncomp=1, plsc=0.01225,
-                                                          fwhm=fwhm[1], annulus_width=3, aperture_radius=3,
-                                                          planets_xy_coord=planet_xycoord, cube_ref=None,
-                                                          svd_mode='lapack',f_range=f_range_K2[i], simplex=True,
-                                                          fmerit='sum',scaling=None, simplex_options=simplex_options,
-                                                          collapse='median',verbose=False)
+std_flux=np.zeros_like(wl)
+std_r=np.sqrt(np.sum(abs(r_inj - np.mean(r_inj))**2)/(n_samples-1))
+std_theta=np.sqrt(np.sum(abs(theta_inj - np.mean(theta_inj))**2)/(n_samples-1))
+std_flux=np.zeros_like(wl)
+for i in range(0,len(wl)):
+   std_flux[i]=np.sqrt(np.sum(abs(spectra_mes[i,:] - np.mean(spectra_mes[i,:]))**2)/(n_samples-1))
 
-        r_mes_K1[j] = fake_comp_K1[0]
-        theta_mes_K1[j] = fake_comp_K1[1]
-        spectra_mes_K1[j] = fake_comp_K1[2]
-        r_mes_K2[j] = fake_comp_K2[0]
-        theta_mes_K2[j] = fake_comp_K2[1]
-        spectra_mes_K2[j] = fake_comp_K2[2]
+print("Wavelength: ",i)
+print("Error r_K1: ", std_r[i])
+print("Error theta_K1: ", std_theta[i])
+print("Error flux_K1: ", std_flux[i])
 
-    std_r_K1[i]=np.sqrt(np.sum(abs(r_inj - r_mes_K1)**2)/(n_samples-1))
-    std_theta_K1[i]=np.sqrt(np.sum(abs(theta_inj - theta_mes_K1)**2)/(n_samples-1))
-    std_flux_K1[i]=np.sqrt(np.sum(abs(spectra_mes_K1 - f_K1[i])**2)/(n_samples-1))
-    std_r_K2[i]=np.sqrt(np.sum(abs(r_inj - r_mes_K2)**2)/(n_samples-1))
-    std_theta_K2[i]=np.sqrt(np.sum(abs(theta_inj - theta_mes_K2)**2)/(n_samples-1))
-    std_flux_K2[i]=np.sqrt(np.sum(abs(spectra_mes_K2 - f_K2[i])**2)/(n_samples-1))
-    print("Companion: ",i)
-    print("Error r_K1: ", std_r_K1[i])
-    print("Error theta_K1: ", std_theta_K1[i])
-    print("Error flux_K1: ", std_flux_K1[i])
-    print("Error r_K2: ", std_r_K2[i])
-    print("Error theta_K2: ", std_theta_K2[i])
-    print("Error flux_K2: ", std_flux_K2[i])
-
-np.savetxt("Errors_K1.txt", (std_r_K1,std_theta_K1,std_flux_K1), delimiter='   ') # Saves to file
-np.savetxt("Errors_K2.txt", (std_r_K2,std_theta_K2,std_flux_K2), delimiter='   ')
+np.savetxt("Errors_IFS.txt", (std_r,std_theta,std_flux), delimiter='   ') # Saves to file

@@ -138,45 +138,113 @@ cube_mask = cube # Make a safe copy of the cube that will be used as the masked 
 
 # Masking
 ## Ad
-for i in range(512,542): # Iterate through all pixels in X/Y positions
-    for j in range(560,587):
-        X = random.randint(548,558) # Find random coordinates within a predefined box for noise search
-        Y = random.randint(447,464)
-        mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
-        cube_mask[:,:,j,i] = mask_value
+R2 = 14**2 # Radius of the star considered
+mask = np.zeros_like(cube[:,0,:,:])
+mask_value = np.zeros((2,28,28))
+shift = -angs+angs[0] # Angular shift
+for h in range(len(angs)):
+    x=0
+    y=0
+    for i in range(480,508): # Iterate through all pixels in X/Y positions
+        for j in range(557,585):
+            r2 = (i-494)**2+(j-571)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                mask_value[:,y,x] = cube[:,h,j,i]
+            y+=1
+        y=0
+        x+=1
+    x=0
+    y=0
+    for i in range(514,542): # Iterate through all pixels in X/Y positions
+        for j in range(557,585):
+            r2 = (i-528)**2+(j-571)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                cube_mask[:,h,j,i] = mask_value[:,y,x]
+            y+=1
+        y=0
+        x+=1
 
-## Ab
-for i in range(435,506): # Iterate through all pixels in X/Y positions
-    for j in range(409,467):
-        X = random.randint(428,446) # Find random coordinates within a predefined box for noise search
-        Y = random.randint(536,545)
-        mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
-        cube_mask[:,:,j,i] = mask_value
+# for i in range(512,542): # Iterate through all pixels in X/Y positions
+#     for j in range(560,587):
+#         X = random.randint(548,558) # Find random coordinates within a predefined box for noise search
+#         Y = random.randint(447,464)
+#         mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
+#         cube_mask[:,:,j,i] = mask_value
+#
+# ## Ab
+R2 = 29**2 # Radius of the star considered
+mask = np.zeros_like(cube[:,0,:,:])
+mask_value = np.zeros((2,58,58))
+shift = -angs+angs[0] # Angular shift
+for h in range(len(angs)):
+    x=0
+    y=0
+    for i in range(516,574): # Iterate through all pixels in X/Y positions
+        for j in range(412,470):
+            r2 = (i-545)**2+(j-441)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                mask_value[:,y,x] = cube[:,h,j,i]
+            y+=1
+        y=0
+        x+=1
+    x=0
+    y=0
+    for i in range(447,505): # Iterate through all pixels in X/Y positions
+        for j in range(410,468):
+            r2 = (i-474)**2+(j-439)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                cube_mask[:,h,j,i] = mask_value[:,y,x]
+            y+=1
+        y=0
+        x+=1
+# for i in range(435,506): # Iterate through all pixels in X/Y positions
+#     for j in range(409,467):
+#         X = random.randint(428,446) # Find random coordinates within a predefined box for noise search
+#         Y = random.randint(536,545)
+#         mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
+#         cube_mask[:,:,j,i] = mask_value
+#
+# ## E
+R2 = 24**2 # Radius of the star considered
+mask = np.zeros_like(cube[:,0,:,:])
+mask_value = np.zeros((2,48,48))
+shift = -angs+angs[0] # Angular shift
+for h in range(len(angs)):
+    x=0
+    y=0
+    for i in range(300,344): # Iterate through all pixels in X/Y positions
+        for j in range(394,438):
+            r2 = (i-322)**2+(j-416)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                mask_value[:,y,x] = cube[:,h,j,i]
+            y+=1
+        y=0
+        x+=1
+    x=0
+    y=0
+    for i in range(326,370): # Iterate through all pixels in X/Y positions
+        for j in range(356,400):
+            r2 = (i-348)**2+(j-378)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                cube_mask[:,h,j,i] = mask_value[:,y,x]
+            y+=1
+        y=0
+        x+=1
 
-## E
-for i in range(339,377): # Iterate through all pixels in X/Y positions
-    for j in range(351,392):
-        X = random.randint(714,727) # Find random coordinates within a predefined box for noise search
-        Y = random.randint(500,512)
-        mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
-        cube_mask[:,:,j,i] = mask_value
+# contr = vip_hci.metrics.contrcurve.contrast_curve(cube_mask[1], -angs, psf_norm[1], fwhm=fwhm[1],
+#                                           pxscale=0.01225, starphot=1033893.75, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
+#                                           theta=120, inner_rad=1, wedge=(0, 360), fc_snr=100,
+#                                           student=True, transmission=None, smooth=True,
+#                                           interp_order=2, plot=True, dpi=100, imlib='opencv',
+#                                           debug=True, verbose=True, full_output=False, save_plot=None,
+#                                           object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='single',
+#                                           scale_list=wl[1]/wl[1])
+#
+# # np.savetxt('/home/alan/Desktop/IRDIS_dist_arcsec_K2.txt', contr['distance_arcsec'], delimiter='   ')
+# # np.savetxt('/home/alan/Desktop/IRDIS_mag_contr_K2.txt', contr['mag_contr'], delimiter='   ')
+# plt.show()
 
-## S15
-for i in range(435,506): # Iterate through all pixels in X/Y positions
-    for j in range(409,467):
-        X = random.randint(428,446) # Find random coordinates within a predefined box for noise search
-        Y = random.randint(536,545)
-        mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
-        cube_mask[:,:,j,i] = mask_value
-
-## S16
-for i in range(339,377): # Iterate through all pixels in X/Y positions
-    for j in range(351,392):
-        X = random.randint(714,727) # Find random coordinates within a predefined box for noise search
-        Y = random.randint(500,512)
-        mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
-        cube_mask[:,:,j,i] = mask_value
-
+#
 d = vip_hci.hci_postproc.median_sub(cube_mask[0],-angs,fwhm=fwhm[0],verbose=False)
 ds9 = vip_hci.Ds9Window()
 ds9.display(cube_mask[0,0],d)

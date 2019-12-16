@@ -208,6 +208,9 @@ for i in range(0,2):
         c[i] = vip_hci.negfc.cube_planet_free([(r,t,fk2)],cube[i],-angs,psf_norm[i],plsc=pxscale)
 plot_frames(c[0,0], size_factor=10, vmin=-10, vmax=10)
 
+cube_negfc = vip_hci.metrics.cube_inject_companions(cube[0],psf_norm[0],-angs,flevel=800,plsc=pxscale,rad_dists=95.5,theta=278.3)
+ds9 = vip_hci.Ds9Window()
+ds9.display(cube_negfc[0])
 
 c = np.zeros_like(cube)
 res = np.zeros_like(cube)
@@ -319,8 +322,8 @@ qzcar_comp = np.zeros((9,2))
 for i in range(0,9):
     qzcar_comp[i][0] = contr['mag_contr']
     qzcar_comp[i][1] = contr['mag_contr']
-np.savetxt('/home/alan/Desktop/dist_arcsec_K2.txt', contr['distance_arcsec'], delimiter='   ')
-np.savetxt('/home/alan/Desktop/mag_contr_K2.txt', contr['mag_contr'], delimiter='   ')
+np.savetxt('/home/alan/Desktop/dist_arcsec_IFS.txt', contr['distance_arcsec'], delimiter='   ')
+np.savetxt('/home/alan/Desktop/mag_contr_IFS.txt', contr['mag_contr'], delimiter='   ')
 np.savetxt('/home/alan/Desktop/mag_contr_K1.txt', contr['mag_contr'], delimiter='   ')
 
 help(vip_hci.metrics.contrcurve.throughput)
@@ -346,17 +349,20 @@ with open('/Users/alan/Downloads/K1K2Julia.txt') as f:
 comp_xycoord = [[comp_pos[4][0],comp_pos[4][1]]] # Companion coords
 simplex_guess_K1[4] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[4],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False)
 
-centy, centx = vip_hci.var.frame_center(cube_cropped[0])
+centy, centx = vip_hci.var.frame_center(cube[0,0])
 posy = r_0 * np.sin(np.deg2rad(theta_0)) + centy
 posx = r_0 * np.cos(np.deg2rad(theta_0)) + centx
+posy = r_0 * np.sin(np.deg2rad(theta_0)) + 145
+posx = r_0 * np.cos(np.deg2rad(theta_0)) + 145
+np.deg2rad(theta_0) = mh.acos((60-145)/97)
 print(posx, posy)
 
 ## Error estimation
-r_0 = 4.774963433391237118e+02
-theta_0 = 1.938721520342480176e+02
-flux_0 = 1.859074952441568129e+01
+r_0 = 1.971334773278342709e+02
+theta_0 = 7.326447481557413255e+01
+flux_0 = 3.223110891696441627e+01
 centy, centx = vip_hci.var.frame_center(cube[0,0])
-n_samples=5
+n_samples=7
 
 theta_inj= np.zeros(n_samples)
 r_inj=np.zeros(n_samples)
@@ -403,18 +409,18 @@ for j in range(0,n_samples):
     theta_mes_K2[j] = fake_comp_K2[1]
     spectra_mes_K2[j] = fake_comp_K2[2]
 
-flux_K1 = 1.859074952441568129e+01
-flux_K2 = 1.233757488348718212e+01
+flux_K1 = 3.223110891696441627e+01
+flux_K2 = 1.230475984428790959e+01
 std_flux_K1=np.zeros_like(wl)
 std_flux_corr_K1=np.zeros_like(wl)
 std_r_K1=np.sqrt(np.sum(abs(r_inj - r_mes_K1)**2)/(n_samples-1))
-std_theta_K1=np.sqrt(np.sum(abs(theta_inj - theta_mes_K1)**2)(n_samples-1))
-std_flux_K1=np.sqrt(np.sum(abs(spectra_mes_K1 - flux_K1)**2)(n_samples-1))
+std_theta_K1=np.sqrt(np.sum(abs(theta_inj - theta_mes_K1)**2)/(n_samples-1))
+std_flux_K1=np.sqrt(np.sum(abs(spectra_mes_K1 - flux_K1)**2)/(n_samples-1))
 std_flux_K2=np.zeros_like(wl)
 std_flux_corr_K2=np.zeros_like(wl)
-std_r_K2=np.sqrt(np.sum(abs(r_inj - r_mes_K2)**2)(n_samples-1))
-std_theta_K2=np.sqrt(np.sum(abs(theta_inj - theta_mes_K2)**2)(n_samples-1))
-std_flux_K2=np.sqrt(np.sum(abs(spectra_mes_K2 - flux_K2)**2)(n_samples-1))
+std_r_K2=np.sqrt(np.sum(abs(r_inj - r_mes_K2)**2)/(n_samples-1))
+std_theta_K2=np.sqrt(np.sum(abs(theta_inj - theta_mes_K2)**2)/(n_samples-1))
+std_flux_K2=np.sqrt(np.sum(abs(spectra_mes_K2 - flux_K2)**2)/(n_samples-1))
 
 print(std_r_K1)
 
@@ -455,3 +461,28 @@ for i in range(0,2):
                                                                     full_output=False,
                                                                     title=source,
                                                                     edgecolor = 'm',facecolor = 'b',range=())
+R2 = 22**2 # Radius of the star considered
+mask = np.zeros_like(cube[:,0,:,:])
+mask_value = np.zeros((2,44,44))
+shift = -angs+angs[0] # Angular shift
+for h in range(len(angs)):
+    x=0
+    y=0
+    for i in range(300,344): # Iterate through all pixels in X/Y positions
+        for j in range(394,438):
+            r2 = (i-322)**2+(j-416)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                mask_value[:,y,x] = cube[:,h,j,i]
+            y+=1
+        y=0
+        x+=1
+    x=0
+    y=0
+    for i in range(326,370): # Iterate through all pixels in X/Y positions
+        for j in range(356,400):
+            r2 = (i-348)**2+(j-378)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                cube_mask[:,h,j,i] = mask_value[:,y,x]
+            y+=1
+        y=0
+        x+=1
