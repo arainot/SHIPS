@@ -10,10 +10,10 @@
 # Set up your parameters
 
 ## Define images to analyse
-cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 # wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
 # cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
 # angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
@@ -119,8 +119,8 @@ for i in range(0,len(wl)):
     ### Flux
     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
-    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area
-    psf_bkg_sum = psf_bkg_mean * aper_psf.area
+    psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
+    psf_bkg_sum = psf_bkg_mean * aper_psf.area()
     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
 
 ### Aperture photometry - Companions
@@ -134,10 +134,10 @@ for i in range(0,len(radial_dist)):
     phot_noise_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_noise_comp)
     phot_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_comp_K1)
     phot_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_comp_K2)
-    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area-aper_comp_K1.area)
-    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area-aper_comp_K2.area)
-    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area
-    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area
+    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K1.area())
+    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K2.area())
+    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area()
+    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area()
     final_sum_K1[i] = phot_K1['aperture_sum'] - bkg_sum_K1
     final_sum_K2[i] = phot_K2['aperture_sum'] - bkg_sum_K2
 
@@ -154,8 +154,8 @@ if extract_spec == True:
     f_range_K1 = np.zeros((len(final_sum_K1),200))
     f_range_K2 = np.zeros((len(final_sum_K2),200))
     for i in range(0,len(final_sum_K1)):
-        f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]),5 *np.abs(final_sum_K1[i]),200)
-        f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]),5 *np.abs(final_sum_K2[i]),200)
+        f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]),70 *np.abs(final_sum_K1[i]),200)
+        f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]),70 *np.abs(final_sum_K2[i]),200)
 
 r_K1 = np.array([])
 theta_K1 = np.array([])
@@ -170,8 +170,11 @@ std_r_K2 = np.zeros_like(final_sum_K1)
 std_theta_K2 = np.zeros_like(final_sum_K1)
 std_flux_K2 = np.zeros_like(final_sum_K1)
 
-with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K1.txt') as f:
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex_K1.txt') as f:
     header1 = f.readline()
+    header2 = f.readline()
+    header3 = f.readline()
+    header4 = f.readline()
     for line in f:
         line = line.strip()
         columns = line.split()
@@ -179,10 +182,11 @@ with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K1.txt'
         theta_K1 = np.append(theta_K1,float(columns[1]))
         f_K1 = np.append(f_K1,float(columns[2]))
 f.close
-with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt') as f:
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt') as f:
     header1 = f.readline()
     header2 = f.readline()
     header3 = f.readline()
+    header4 = f.readline()
     for line in f:
         line = line.strip()
         columns = line.split()
@@ -202,7 +206,7 @@ for i in range(len(r_K1)-3):
     for j in range(0,n_samples):
        r_inj[j]=r_K1[i]
        theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_K1[i]-360.
-
+    print("Companion: ",i)
 
     spectra_mes_K1 = np.zeros(len(r_inj))
     theta_mes_K1= np.zeros_like(theta_inj)

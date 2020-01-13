@@ -237,7 +237,10 @@ for i in range(len(f)):
 
 for i in range(len(r)):
     c[i]=vip_hci.negfc.cube_planet_free([(r[i]-1,theta[i]-0.6,flux[i])],cube[i],-angs,psf_norm[i],plsc=0.0075, imlib='opencv', interpolation='lanczos4')
-d = vip_hci.hci_postproc.median_sub(c[0],-angs,fwhm=fwhm[0],verbose=False)
+
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/cube_free_IRDIS.fits'
+cube_mask = vip_hci.fits.open_fits(cube_filepath)
+d = vip_hci.hci_postproc.median_sub(cube_mask[1],-angs,fwhm=fwhm[1],verbose=False)
 ds9.display(d)
 
 r_K1 = np.array([])
@@ -337,14 +340,13 @@ vip_hci.metrics.contrcurve.contrast_curve(cube[0], -angs, psf_norm[0], fwhm=fwhm
                                           scale_list=wl[0])
 
 K1 = np.array([])
-K1K2 = np.array([])
-with open('/Users/alan/Downloads/K1K2Julia.txt') as f:
-    header1 = f.readline()
+K2 = np.array([])
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Simplex_errors/Simplex_K1_flux_S0.txt') as f:
     for line in f:
         line = line.strip()
         columns = line.split()
         K1 = np.append(K1,float(columns[0]))
-        K1K2 = np.append(K1K2,float(columns[1]))
+        #K1K2 = np.append(K1K2,float(columns[1]))
 
 comp_xycoord = [[comp_pos[4][0],comp_pos[4][1]]] # Companion coords
 simplex_guess_K1[4] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[4],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False)
@@ -430,7 +432,7 @@ from pickle import Pickler
 pickler={}
 mcmc_result={}
 for i in range(0,2): # Read all channels and store them to variables
-    with open('/home/alan/midwork/python/ships/results/QZCarK1_IRDIS_companions_S{}/MCMC_results'.format(i),'rb') as fi:
+    with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/MCMC/S9S10/QZCarK1_IRDIS_companions_S{}/MCMC_results'.format(i),'rb') as fi:
             pickler["myPickler{}".format(i)] = pickle.Unpickler(fi)
             mcmc_result["mcmc_result{}".format(i)] = pickler["myPickler{}".format(i)].load()
 

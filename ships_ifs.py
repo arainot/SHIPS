@@ -20,11 +20,11 @@ psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_ps
 # psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = (129,169) # Companion position in pixels from the center of the frame (X,Y)
-psf_pos = (33, 33) # PSF position in pixels (X,Y)
-radial_dist = 28. # Radial distance of companion in pixels
-position_angle = 121.  # Position angle of companion in degrees
-noise_aperture_pos_comp = (15,40) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
+psf_pos = (32, 33) # PSF position in pixels (X,Y)
+radial_dist = 97. # Radial distance of companion in pixels
+position_angle = 159.  # Position angle of companion in degrees
+noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
@@ -33,7 +33,7 @@ ncores = 4 # Number of cores you are willing to share for the computation
 
 ## Do you want to see the image?
 see_cube = False # Original cube
-see_collapsed_cube = True # Collapsed cube
+see_collapsed_cube = False # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
 
@@ -77,9 +77,9 @@ mcmc_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/mcmc/' # Director
 plot_mcmc = False # Plot the mcmc errors with simplex?
 
 ## Reading MCMC results
-read_mcmc = False # Do you wish to read the MCMC results?
+read_mcmc = True # Do you wish to read the MCMC results?
 source = 'QZCar' # Give name for your source
-mcmc_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/mcmc/' # Directory where MCMC results are stored
+mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results are stored
 
 ## Load calibrated FASTWIND models of the central star
 fastwind = False # Use FASTWIND model spectra for the star

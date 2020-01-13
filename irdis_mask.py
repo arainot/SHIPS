@@ -172,31 +172,88 @@ for h in range(len(angs)):
 #         cube_mask[:,:,j,i] = mask_value
 #
 # ## Ab
-R2 = 29**2 # Radius of the star considered
+
+
+R2 = 71**2 # Radius of the star considered
 mask = np.zeros_like(cube[:,0,:,:])
-mask_value = np.zeros((2,58,58))
+mask_value = np.zeros((2,142,142))
 shift = -angs+angs[0] # Angular shift
-for h in range(len(angs)):
-    x=0
-    y=0
-    for i in range(516,574): # Iterate through all pixels in X/Y positions
-        for j in range(412,470):
-            r2 = (i-545)**2+(j-441)**2# Calculate the radius of the pixel from the center pixel
-            if r2<=R2: # If the pixels are in the circle of radius R
-                mask_value[:,y,x] = cube[:,h,j,i]
-            y+=1
-        y=0
-        x+=1
-    x=0
-    y=0
-    for i in range(447,505): # Iterate through all pixels in X/Y positions
-        for j in range(410,468):
-            r2 = (i-474)**2+(j-439)**2# Calculate the radius of the pixel from the center pixel
-            if r2<=R2: # If the pixels are in the circle of radius R
-                cube_mask[:,h,j,i] = mask_value[:,y,x]
-            y+=1
-        y=0
-        x+=1
+for k in range(0,2):
+    if k==1:
+        for h in range(len(angs)):
+            x=0
+            y=0
+            for i in range(366,508): # Iterate through all pixels in X/Y positions
+                for j in range(505,647):
+                    r2 = (i-437)**2+(j-576)**2# Calculate the radius of the pixel from the center pixel
+                    if r2<=R2: # If the pixels are in the circle of radius R
+                        mask_value[k,y,x] = cube[k,h,j,i]
+                    y+=1
+                y=0
+                x+=1
+            x=0
+            y=0
+            for w in range(0,2):
+                mask_value[w] = vip_hci.preproc.frame_rotate(mask_value[w],-90)
+            for i in range(402,544): # Iterate through all pixels in X/Y positions
+                for j in range(366,508):
+                    r2 = (i-472)**2+(j-437)**2# Calculate the radius of the pixel from the center pixel
+                    if r2<=R2: # If the pixels are in the circle of radius R
+                        cube_mask[k,h,j,i] = mask_value[k,y,x]
+                    y+=1
+                y=0
+                x+=1
+    else:
+        for h in range(len(angs)):
+            x=0
+            y=0
+            for i in range(366,508): # Iterate through all pixels in X/Y positions
+                for j in range(505,647):
+                    r2 = (i-437)**2+(j-576)**2# Calculate the radius of the pixel from the center pixel
+                    if r2<=R2: # If the pixels are in the circle of radius R
+                        mask_value[k,y,x] = cube[k,h,j,i]
+                    y+=1
+                y=0
+                x+=1
+            x=0
+            y=0
+            for w in range(0,2):
+                mask_value[w] = vip_hci.preproc.frame_rotate(mask_value[w],-90)
+            for i in range(402,544): # Iterate through all pixels in X/Y positions
+                for j in range(366,508):
+                    r2 = (i-472)**2+(j-437)**2# Calculate the radius of the pixel from the center pixel
+                    if r2<=R2: # If the pixels are in the circle of radius R
+                        cube_mask[k,h,j,i] = mask_value[k,y,x]
+                    y+=1
+                y=0
+                x+=1
+
+# #Old version
+# R2 = 29**2 # Radius of the star considered
+# mask = np.zeros_like(cube[:,0,:,:])
+# mask_value = np.zeros((2,58,58))
+# shift = -angs+angs[0] # Angular shift
+# for h in range(len(angs)):
+#     x=0
+#     y=0
+#     for i in range(516,574): # Iterate through all pixels in X/Y positions
+#         for j in range(412,470):
+#             r2 = (i-545)**2+(j-441)**2# Calculate the radius of the pixel from the center pixel
+#             if r2<=R2: # If the pixels are in the circle of radius R
+#                 mask_value[:,y,x] = cube[:,h,j,i]
+#             y+=1
+#         y=0
+#         x+=1
+#     x=0
+#     y=0
+#     for i in range(447,505): # Iterate through all pixels in X/Y positions
+#         for j in range(410,468):
+#             r2 = (i-474)**2+(j-439)**2# Calculate the radius of the pixel from the center pixel
+#             if r2<=R2: # If the pixels are in the circle of radius R
+#                 cube_mask[:,h,j,i] = mask_value[:,y,x]
+#             y+=1
+#         y=0
+#         x+=1
 # for i in range(435,506): # Iterate through all pixels in X/Y positions
 #     for j in range(409,467):
 #         X = random.randint(428,446) # Find random coordinates within a predefined box for noise search
@@ -204,7 +261,7 @@ for h in range(len(angs)):
 #         mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
 #         cube_mask[:,:,j,i] = mask_value
 #
-# ## E
+## E
 R2 = 24**2 # Radius of the star considered
 mask = np.zeros_like(cube[:,0,:,:])
 mask_value = np.zeros((2,48,48))
@@ -231,6 +288,60 @@ for h in range(len(angs)):
         y=0
         x+=1
 
+## S?
+R2 = 15**2 # Radius of the star considered
+mask = np.zeros_like(cube[:,0,:,:])
+mask_value = np.zeros((2,30,30))
+shift = -angs+angs[0] # Angular shift
+for h in range(len(angs)):
+    x=0
+    y=0
+    for i in range(384,414): # Iterate through all pixels in X/Y positions
+        for j in range(349,379):
+            r2 = (i-399)**2+(j-364)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                mask_value[:,y,x] = cube[:,h,j,i]
+            y+=1
+        y=0
+        x+=1
+    x=0
+    y=0
+    for i in range(412,442): # Iterate through all pixels in X/Y positions
+        for j in range(332,362):
+            r2 = (i-427)**2+(j-347)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                cube_mask[:,h,j,i] = mask_value[:,y,x]
+            y+=1
+        y=0
+        x+=1
+
+## S?
+R2 = 25**2 # Radius of the star considered
+mask = np.zeros_like(cube[:,0,:,:])
+mask_value = np.zeros((2,50,50))
+shift = -angs+angs[0] # Angular shift
+for h in range(len(angs)):
+    x=0
+    y=0
+    for i in range(331,381): # Iterate through all pixels in X/Y positions
+        for j in range(317,367):
+            r2 = (i-356)**2+(j-342)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                mask_value[:,y,x] = cube[:,h,j,i]
+            y+=1
+        y=0
+        x+=1
+    x=0
+    y=0
+    for i in range(375,425): # Iterate through all pixels in X/Y positions
+        for j in range(287,337):
+            r2 = (i-400)**2+(j-312)**2# Calculate the radius of the pixel from the center pixel
+            if r2<=R2: # If the pixels are in the circle of radius R
+                cube_mask[:,h,j,i] = mask_value[:,y,x]
+            y+=1
+        y=0
+        x+=1
+
 # contr = vip_hci.metrics.contrcurve.contrast_curve(cube_mask[1], -angs, psf_norm[1], fwhm=fwhm[1],
 #                                           pxscale=0.01225, starphot=1033893.75, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
 #                                           theta=120, inner_rad=1, wedge=(0, 360), fc_snr=100,
@@ -245,6 +356,6 @@ for h in range(len(angs)):
 # plt.show()
 
 #
-d = vip_hci.hci_postproc.median_sub(cube_mask[0],-angs,fwhm=fwhm[0],verbose=False)
+d = vip_hci.hci_postproc.median_sub(cube_mask[1],-angs,fwhm=fwhm[1],verbose=False)
 ds9 = vip_hci.Ds9Window()
 ds9.display(cube_mask[0,0],d)

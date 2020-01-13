@@ -157,60 +157,19 @@ with open('/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt')
 ## Error estimation
 simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
 centy, centx = vip_hci.var.frame_center(cube[0,0])
-n_samples=20
-
-theta_inj= np.zeros(n_samples)
-r_inj=np.zeros(n_samples)
-for j in range(0,n_samples):
-   r_inj[j]=r_0
-   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_0
-
-for j in range(0,n_samples):
-   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta[i]-360.
-   posy = r_inj[j] * np.sin(np.deg2rad(theta_inj[j])) + centy
-   posx = r_inj[j] * np.cos(np.deg2rad(theta_inj[j])) + centx
-   spectra_mes = np.zeros((n_samples,len(wl)))
-   theta_mes = np.zeros((n_samples,len(wl)))
-   r_mes= np.zeros((n_samples,len(wl)))
-   fake_comp = np.zeros_like(wl)
-
-   for i in range(len(r)):
-
-      theta_inj=(j+1)*(360./(n_samples+1.))+theta[i]-360.
-      posy = r_inj * np.sin(np.deg2rad(theta_inj)) + centy
-      posx = r_inj[i] * np.cos(np.deg2rad(theta_inj)) + centx
-      planet_xycoord = np.array([[posx,posy]])
-
-      cube_inj=vip_hci.metrics.cube_inject_companions(cube[i], psf_norm[i], -angs, flevel=f[i], plsc=0.0074,
-                                                       rad_dists=r_inj[i], n_branches=1, theta=theta_inj,
-                                                       imlib='opencv', interpolation='lanczos4', verbose=False)
-
-      fake_comp[i] = vip_hci.negfc.simplex_optim.firstguess(cube_inj, -angs, psf_norm[i], ncomp=1, plsc=0.0074,
-                                                      fwhm=fwhm[i], annulus_width=3, aperture_radius=3,
-                                                      planets_xy_coord=planet_xycoord, cube_ref=None,
-                                                      svd_mode='lapack',f_range=f_range[i], simplex=True,
-                                                      fmerit='sum',scaling=None, simplex_options=simplex_options,
-                                                      collapse='median',verbose=False)
-
-    r_mes[j] = fake_comp[:,0,0]
-    theta_mes[j] = fake_comp[0,:,0]
-    spectra_mes[j] = fake_comp[0,0,:]
-
-    std_r[i]=np.sqrt(np.sum(abs(r_inj - r_mes)**2)/(n_samples-1))
-    std_theta[i]=np.sqrt(np.sum(abs(theta_inj - theta_mes)**2)/(n_samples-1))
-    std_flux[i]=np.sqrt(np.sum(abs(spectra_mes_K1 - f[i])**2)/(n_samples-1))
-
-print('companion r_0, theta_0: ', r_0, theta_0)
-centy, centx = vip_hci.var.frame_center(cube_cropped[0])
 n_samples=15
 
+# Load Ad & Ab masked cube
+cube_filepath = '/Users/alan/Desktop/cube_free_IFS.fits'
+cube_mask = vip_hci.fits.open_fits(cube_filepath)
+
 theta_inj= np.zeros(n_samples)
 r_inj=np.zeros(n_samples)
 for j in range(0,n_samples):
-   r_inj[j]=r_0
-   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta_0
+   r_inj[j]=r[0]
+   theta_inj[j]=(j+1)*(360./(n_samples+1.))+theta[0]
 
-
+f[0] = 2.007886941914275311e+02
 spectra_mes = np.zeros(shape=(len(wl),len(r_inj)))
 theta_mes= np.zeros_like(theta_inj)
 r_mes= np.zeros_like(r_inj)
@@ -219,13 +178,13 @@ for j in range(0,n_samples):
    posy = r_inj[j] * np.sin(np.deg2rad(theta_inj[j])) + centy
    posx = r_inj[j] * np.cos(np.deg2rad(theta_inj[j])) + centx
    print('Fake companion #: ', j+1)
-   print('r, theta, = ',r_inj[j], theta_inj[j])
+   print('r, theta = ',r_inj[j], theta_inj[j])
 
-   cube_inj=vip_hci.metrics.cube_inject_companions(cube, psf_norm, -angs, flevel=f, plsc=0.0074,
+   cube_inj=vip_hci.metrics.cube_inject_companions(cube_mask, psf_norm, -angs, flevel=f, plsc=0.0074,
                                                    rad_dists=r_inj[j], n_branches=1, theta=theta_inj[j],
                                                    imlib='opencv', interpolation='lanczos4', verbose=False)
 
-   for i in range(0,len(w_lambda)):
+   for i in range(0,len(wl)):
        planet_xycoord = np.array([[posx,posy]])
        fake_comp = vip_hci.negfc.simplex_optim.firstguess(cube_inj[i], -angs, psf_norm[i], ncomp=1, plsc=0.0074,
                                                           fwhm=fwhm[i], annulus_width=3, aperture_radius=2,
@@ -244,9 +203,8 @@ std_flux=np.zeros_like(wl)
 for i in range(0,len(wl)):
    std_flux[i]=np.sqrt(np.sum(abs(spectra_mes[i,:] - np.mean(spectra_mes[i,:]))**2)/(n_samples-1))
 
-print("Wavelength: ",i)
-print("Error r_K1: ", std_r[i])
-print("Error theta_K1: ", std_theta[i])
-print("Error flux_K1: ", std_flux[i])
+print("Error r_K1: ", std_r)
+print("Error theta_K1: ", std_theta)
+print("Error flux_K1: ", std_flux)
 
 np.savetxt("Errors_IFS.txt", (std_r,std_theta,std_flux), delimiter='   ') # Saves to file

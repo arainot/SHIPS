@@ -10,15 +10,11 @@
 # Set up your parameters
 
 ## Define images to analyse
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
-cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-#cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/cube_free_Ad.fits'
-wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/corrected_psf.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
+
 # wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 # cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
 # angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
@@ -161,16 +157,17 @@ cube_mask = cube # Make a safe copy of the cube that will be used as the masked 
 
 # Masking
 ## Ad
-R2 = 11**2 # Radius of the star considered
+
+R2 = 16**2 # Radius of the star considered
 mask = np.zeros_like(cube[:,0,:,:])
-mask_value = np.zeros((39,22,22))
+mask_value = np.zeros((39,32,32))
 shift = -angs+angs[0] # Angular shift
 for h in range(len(angs)):
     x=0
     y=0
-    for i in range(49,71): # Iterate through all pixels in X/Y positions
-        for j in range(91,113):
-            r2 = (i-60)**2+(j-102)**2# Calculate the radius of the pixel from the center pixel
+    for i in range(38,70): # Iterate through all pixels in X/Y positions
+        for j in range(100,132):
+            r2 = (i-54)**2+(j-116)**2# Calculate the radius of the pixel from the center pixel
             if r2<=R2: # If the pixels are in the circle of radius R
                 mask_value[:,y,x] = cube[:,h,j,i]
             y+=1
@@ -178,29 +175,26 @@ for h in range(len(angs)):
         x+=1
     x=0
     y=0
-    for i in range(38,60): # Iterate through all pixels in X/Y positions
-        for j in range(138,160):
-            r2 = (i-49)**2+(j-149)**2# Calculate the radius of the pixel from the center pixel
+    for i in range(34,66): # Iterate through all pixels in X/Y positions
+        for j in range(133,165):
+            r2 = (i-50)**2+(j-149)**2# Calculate the radius of the pixel from the center pixel
             if r2<=R2: # If the pixels are in the circle of radius R
                 cube_mask[:,h,j,i] = mask_value[:,y,x]
             y+=1
         y=0
         x+=1
-            # X = random.randint(54,64) # Find random coordinates within a predefined box for noise search
-            # Y = random.randint(97,107)
-            # mask_value = cube[:,:,Y,X] # Find the noise values at the random coordinates
-            # cube_mask[:,:,j,i] = mask_value
 
-# R2 = 24**2 # Radius of the star considered
+# # Old version -- smaller
+# R2 = 11**2 # Radius of the star considered
 # mask = np.zeros_like(cube[:,0,:,:])
-# mask_value = np.zeros((39,47,47))
+# mask_value = np.zeros((39,22,22))
 # shift = -angs+angs[0] # Angular shift
 # for h in range(len(angs)):
 #     x=0
 #     y=0
-#     for i in range(27,74): # Iterate through all pixels in X/Y positions
-#         for j in range(195,240):
-#             r2 = (i-52)**2+(j-217)**2# Calculate the radius of the pixel from the center pixel
+#     for i in range(49,71): # Iterate through all pixels in X/Y positions
+#         for j in range(91,113):
+#             r2 = (i-60)**2+(j-102)**2# Calculate the radius of the pixel from the center pixel
 #             if r2<=R2: # If the pixels are in the circle of radius R
 #                 mask_value[:,y,x] = cube[:,h,j,i]
 #             y+=1
@@ -208,27 +202,26 @@ for h in range(len(angs)):
 #         x+=1
 #     x=0
 #     y=0
-#     for w in range(len(wl)):
-#         mask_value[w] = vip_hci.preproc.frame_rotate(mask_value[w],angle=180)
-#     for i in range(234,281): # Iterate through all pixels in X/Y positions
-#         for j in range(80,127):
-#             r2 = (i-258)**2+(j-104)**2# Calculate the radius of the pixel from the center pixel
+#     for i in range(38,60): # Iterate through all pixels in X/Y positions
+#         for j in range(138,160):
+#             r2 = (i-50)**2+(j-149)**2# Calculate the radius of the pixel from the center pixel
 #             if r2<=R2: # If the pixels are in the circle of radius R
 #                 cube_mask[:,h,j,i] = mask_value[:,y,x]
 #             y+=1
 #         y=0
 #         x+=1
 
-R2 = 24**2 # Radius of the star considered
+
+R2 = 32**2 # Radius of the star considered
 mask = np.zeros_like(cube[:,0,:,:])
-mask_value = np.zeros((39,47,47))
+mask_value = np.zeros((39,64,64))
 shift = -angs+angs[0] # Angular shift
 for h in range(len(angs)):
     x=0
     y=0
-    for i in range(230,277): # Iterate through all pixels in X/Y positions
-        for j in range(144,191):
-            r2 = (i-253)**2+(j-167)**2# Calculate the radius of the pixel from the center pixel
+    for i in range(209,273): # Iterate through all pixels in X/Y positions
+        for j in range(155,219):
+            r2 = (i-241)**2+(j-187)**2# Calculate the radius of the pixel from the center pixel
             if r2<=R2: # If the pixels are in the circle of radius R
                 mask_value[:,y,x] = cube[:,h,j,i]
             y+=1
@@ -238,30 +231,58 @@ for h in range(len(angs)):
     y=0
     # for w in range(len(wl)):
     #     mask_value[w] = vip_hci.preproc.frame_rotate(mask_value[w],angle=270)
-    for i in range(242,289): # Iterate through all pixels in X/Y positions
-        for j in range(80,127):
-            r2 = (i-266)**2+(j-104)**2# Calculate the radius of the pixel from the center pixel
+    for i in range(224,288): # Iterate through all pixels in X/Y positions
+        for j in range(76,140):
+            r2 = (i-266)**2+(j-108)**2# Calculate the radius of the pixel from the center pixel
             if r2<=R2: # If the pixels are in the circle of radius R
                 cube_mask[:,h,j,i] = mask_value[:,y,x]
             y+=1
         y=0
         x+=1
 
-contr = vip_hci.metrics.contrcurve.contrast_curve(cube_mask, -angs, psf_norm, fwhm=np.average(fwhm),
-                                          pxscale=0.0074, starphot=psf_final_sum, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
-                                          theta=190, inner_rad=1, wedge=(0, 360), fc_snr=100,
-                                          student=True, transmission=None, smooth=True,
-                                          interp_order=2, plot=True, dpi=100, imlib='opencv',
-                                          debug=True, verbose=True, full_output=False, save_plot=None,
-                                          object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='double',
-                                          scale_list=wl/wl[19])
-#
-# # np.savetxt('/home/alan/Desktop/IFS_dist_arcsec.txt', contr['distance_arcsec'], delimiter='   ')
-# # np.savetxt('/home/alan/Desktop/IFS_mag_contr.txt', contr['mag_contr'], delimiter='   ')
-plt.show()
+# # # Old version -- smaller
+# R2 = 24**2 # Radius of the star considered
+# mask = np.zeros_like(cube[:,0,:,:])
+# mask_value = np.zeros((39,47,47))
+# shift = -angs+angs[0] # Angular shift
+# for h in range(len(angs)):
+#     x=0
+#     y=0
+#     for i in range(230,277): # Iterate through all pixels in X/Y positions
+#         for j in range(144,191):
+#             r2 = (i-253)**2+(j-167)**2# Calculate the radius of the pixel from the center pixel
+#             if r2<=R2: # If the pixels are in the circle of radius R
+#                 mask_value[:,y,x] = cube[:,h,j,i]
+#             y+=1
+#         y=0
+#         x+=1
+#     x=0
+#     y=0
+#     # for w in range(len(wl)):
+#     #     mask_value[w] = vip_hci.preproc.frame_rotate(mask_value[w],angle=270)
+#     for i in range(242,289): # Iterate through all pixels in X/Y positions
+#         for j in range(80,127):
+#             r2 = (i-266)**2+(j-104)**2# Calculate the radius of the pixel from the center pixel
+#             if r2<=R2: # If the pixels are in the circle of radius R
+#                 cube_mask[:,h,j,i] = mask_value[:,y,x]
+#             y+=1
+#         y=0
+#         x+=1
 
+# contr = vip_hci.metrics.contrcurve.contrast_curve(cube_mask, -angs, psf_norm, fwhm=np.average(fwhm),
+#                                           pxscale=0.0074, starphot=psf_final_sum, algo=vip_hci.pca.pca, sigma=5, nbranch=1,
+#                                           theta=190, inner_rad=1, wedge=(0, 360), fc_snr=100,
+#                                           student=True, transmission=None, smooth=True,
+#                                           interp_order=2, plot=True, dpi=100, imlib='opencv',
+#                                           debug=True, verbose=True, full_output=False, save_plot=None,
+#                                           object_name=None, frame_size=None, figsize=(8, 4), ncomp=1,adimsdi='double',
+#                                           scale_list=wl/wl[19])
+# #
+# # # np.savetxt('/home/alan/Desktop/IFS_dist_arcsec.txt', contr['distance_arcsec'], delimiter='   ')
+# # # np.savetxt('/home/alan/Desktop/IFS_mag_contr.txt', contr['mag_contr'], delimiter='   ')
+# plt.show()
 
-# d = vip_hci.hci_postproc.median_sub(cube_mask[0],-angs,fwhm=fwhm[0],verbose=False)
-# ds9 = vip_hci.Ds9Window()
-# ds9.display(cube_mask[0,0],d)
+d = vip_hci.hci_postproc.median_sub(cube_mask[0],-angs,fwhm=fwhm[0],verbose=False)
+ds9 = vip_hci.Ds9Window()
+ds9.display(cube_mask[0,0],d)
 #vip_hci.fits.write_fits("/Users/alan/Desktop/cube_free_IFS.fits",cube_mask)

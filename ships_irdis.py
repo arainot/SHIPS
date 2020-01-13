@@ -1,9 +1,8 @@
 ############################
 # Date: 08/08/2019
 # Title: Running script for SHIPS for IRDIS data
-# Description: Use this script to run SHIPS for IRDIS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
+# Description: Use this script to run SHIPS for IRDIS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP is used.
 # VIP version: 0.9.11 (Rainot edit.)
-# pyKLIP version: 1.1 NOT IMPLEMENTED YET
 # Python version: 3 ONLY
 ############################
 
@@ -11,7 +10,7 @@
 
 ## Define images to analyse
 cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-cube_filepath = '/Users/alan/Desktop/cube_free_E.fits'
+#cube_filepath = '/Users/alan/Desktop/cube_free_E.fits'
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
@@ -57,6 +56,9 @@ detect_sigma = 5 # What sigma limit would you like for the detection?
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
+
+## Photometric errors in PSF
+
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
@@ -279,7 +281,7 @@ if extract_spec == True:
     simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
     simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
     ## Start Simplex
-    for i in range(5,7):#len(final_sum_K1)):
+    for i in range(3,4):#len(final_sum_K1)):
         print("Companion index: ", i + 1) # Companions for IRDIS
         comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
         simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
