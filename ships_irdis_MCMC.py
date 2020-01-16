@@ -1,6 +1,6 @@
 ############################
 # Date: 09/10/2019
-# Title: Auto running script for SHIPS for IFS data for the MCMC computation. Requires the simplex filefrom SHIPS.
+# Title: Auto running script for SHIPS for IRDIS data for the MCMC computation. Requires the simplex filefrom SHIPS.
 # Description: Use this script to run the MCMC computation of SHIPS in auto mode for IFS data. Requires the simplex filefrom SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP is used.
 # VIP version: 0.9.11
 # Python version: 3 ONLY

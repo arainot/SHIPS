@@ -1,7 +1,7 @@
 psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=int(12), verbose=False,full_output=True)
 
 
- x = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=200,plsc=pxscale,rad_dists=100,theta=100)
+x = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=200,plsc=pxscale,rad_dists=100,theta=100)
 cube_derot = vip_hci.preproc.cube_derotate(x,angs)
 ds9.display(cube_derot)
 
@@ -208,9 +208,12 @@ for i in range(0,2):
         c[i] = vip_hci.negfc.cube_planet_free([(r,t,fk2)],cube[i],-angs,psf_norm[i],plsc=pxscale)
 plot_frames(c[0,0], size_factor=10, vmin=-10, vmax=10)
 
-cube_negfc = vip_hci.metrics.cube_inject_companions(cube[0],psf_norm[0],-angs,flevel=800,plsc=pxscale,rad_dists=95.5,theta=278.3)
+cube_negfc = vip_hci.metrics.cube_inject_companions(cube[0],psf_norm[0],-angs,flevel=800,plsc=pxscale,rad_dists=250,theta=100)
+cube_wl_coll = vip_hci.hci_postproc.median_sub(cube_negfc,-angs,fwhm=fwhm[0],verbose=False)
 ds9 = vip_hci.Ds9Window()
 ds9.display(cube_negfc[0])
+f_range_K1 = np.linspace(0.2*25, 30*25,200)
+vip_hci.negfc.firstguess(cube_negfc,-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1,simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=True,plot=False,save=False)
 
 c = np.zeros_like(cube)
 res = np.zeros_like(cube)
@@ -240,7 +243,7 @@ for i in range(len(r)):
 
 cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/cube_free_IRDIS.fits'
 cube_mask = vip_hci.fits.open_fits(cube_filepath)
-d = vip_hci.hci_postproc.median_sub(cube_mask[1],-angs,fwhm=fwhm[1],verbose=False)
+d = vip_hci.hci_postproc.median_sub(cube_mask[0],-angs,fwhm=fwhm[0],verbose=False)
 ds9.display(d)
 
 r_K1 = np.array([])
@@ -341,11 +344,11 @@ vip_hci.metrics.contrcurve.contrast_curve(cube[0], -angs, psf_norm[0], fwhm=fwhm
 
 K1 = np.array([])
 K2 = np.array([])
-with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Simplex_errors/Simplex_K1_flux_S0.txt') as f:
+with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Simplex_errors/Simplex_K2_flux_S3.txt') as f:
     for line in f:
         line = line.strip()
         columns = line.split()
-        K1 = np.append(K1,float(columns[0]))
+        K2 = np.append(K2,float(columns[0]))
         #K1K2 = np.append(K1K2,float(columns[1]))
 
 comp_xycoord = [[comp_pos[4][0],comp_pos[4][1]]] # Companion coords
@@ -425,6 +428,9 @@ std_theta_K2=np.sqrt(np.sum(abs(theta_inj - theta_mes_K2)**2)/(n_samples-1))
 std_flux_K2=np.sqrt(np.sum(abs(spectra_mes_K2 - flux_K2)**2)/(n_samples-1))
 
 print(std_r_K1)
+
+std_flux_K2=np.sqrt(np.sum(abs(K2 - 3.196914362045397695e+01)**2)/(13-1))
+
 
 ## Read MCMC
 import pickle # Import important MCMC libraries

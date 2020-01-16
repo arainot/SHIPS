@@ -41,11 +41,12 @@ simplex_err_K1_path = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Simplex
 simplex_err_K2_path = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Simplex_errors/'
 
 ## Julia PSF photometry
-julia_K1_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/psf_photometry/psf_photometry_K1.csv'
+julia_K1_path = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Julias_PSF_fitting/psf_photometry_K1.csv'
 julia_K2_path = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/psf_photometry/psf_photometry_K2.csv'
 
 # Central star aperture photometry flux
-central_star_flux = np.array([1793119.1,1033893.75])
+#central_star_flux = np.array([1793119.1,1033893.75])
+central_star_flux = np.array([2024466.5281759,1138772.21601975])
 
 # Center coordinates of the image
 centy = 512
@@ -323,8 +324,10 @@ with open(julia_K1_path) as csvfile:
    reader = csv.reader(csvfile, delimiter=';')
    next(reader, None) #Skip header
    next(reader, None) #Skip header
+   next(reader, None) #Skip header
    j = 0
    for row in reader:
+       print(row[1])
        julia_x_K1[j,0] = float(row[1])
        julia_x_K1[j,1] = float(row[2])
        julia_y_K1[j,0] = float(row[3])
@@ -333,7 +336,7 @@ with open(julia_K1_path) as csvfile:
        julia_flux_K1[j,1] = float(row[6])#+(4671.604084//float(row[5]))**2)
        # julia_flux_K1[j,0] = float(row[5])/48508723.081159
        # julia_flux_K1[j,1] = np.sqrt((float(row[6])/48508723.081159)**2)#+(4671.604084//float(row[5]))**2)
-       julia_dmag_K1[j,0] = -2.5*mh.log10(julia_flux_K1[j,0]/48508723.081159)
+       julia_dmag_K1[j,0] = -2.5*mh.log10(julia_flux_K1[j,0]/3748275.952813)
        julia_dmag_K1[j,1] = 2.5*julia_flux_K1[j,1]/(julia_flux_K1[j,0]*mh.log(10))
        #julia_dmag_K1[j,1] = 2.5*48508723.081159/(julia_flux_K1[j,0]*mh.log(10)) * np.sqrt((julia_flux_K1[i,1]/48508723.081159)**2 + (4671.604084/julia_flux_K1[j,0])**2)
        j+=1

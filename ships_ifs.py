@@ -14,6 +14,7 @@ cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortfra
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 # wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 # cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
 # angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
@@ -59,6 +60,11 @@ detect_sigma = 5 # What sigma limit would you like for the detection?
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
+## Photometric errors of PSF
+psf_errors = True # Compute the photometric errors of the central star's PSF
+psf_errors_save = True # Save the errors to a file?
+psf_errors_file = "/Users/alan/Documents/PhD/Data/IFS/QZCardone/PSF_errors.txt"
+
 ## Aperture Photometry
 plot_aper = False # Plot the aperture photometry of the detected companion?
 
@@ -77,7 +83,7 @@ mcmc_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/mcmc/' # Director
 plot_mcmc = False # Plot the mcmc errors with simplex?
 
 ## Reading MCMC results
-read_mcmc = True # Do you wish to read the MCMC results?
+read_mcmc = False # Do you wish to read the MCMC results?
 source = 'QZCar' # Give name for your source
 mcmc_path = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/spectra/' # Directory where MCMC results are stored
 
@@ -148,7 +154,7 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-#psf = np.median(psf, axis=1) # Take the median of all PSFs
+psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
@@ -256,9 +262,17 @@ if contrast_curves == True:
     contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
-elif contrast_curves == False:
-    print("No contrast curve")
 
+## PSF error calculation
+if psf_errors == True:
+    psferr = vip_hci.fits.open_fits(psf_filepath) # Open the raw PSFs
+    stddev = np.zeros_like(wl) # Create an array for the stored standard deviation
+    for i in range(len(wl)): # Loop over the wavelengths
+        psferr_med = vip_hci.preproc.cosmetics.cube_crop_frames(psferr[i], size_psf, xy=(32, 32), verbose=True, force=True) # Resize the PSF
+        psf_norm_err, maxflux_err, fwhm_err = vip_hci.metrics.normalize_psf(psferr_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # Measure the maximum flux for each PSF
+        stddev[i] = np.std(maxflux_err,ddof=1) # Calculate the standard deviation for the PSFs
+    if psf_errors_save: # Save the error
+        np.savetxt(stddev, psf_errors_file, delimiter='   ') # Saves to file
 
 # Spectrum extraction with NM
 if extract_spec == True:

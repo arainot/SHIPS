@@ -21,7 +21,7 @@ psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_re
 
 ## Photometry
 comp_pos = ([491,456],[559,579],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[519,243],[227,569],[346,778],[847,491],[899,507],[72,533],[819,180],[451,60],[49,396],[732,44],[648,16]) # Companion position in pixels (X,Y)
-psf_pos = (33, 33) # PSF position in pixels (X,Y)
+psf_pos = (32, 32) # PSF position in pixels (X,Y)
 radial_dist = [60.16643583,81.60882305,210.78899402,197.121377136,201.68291946,211,219.,240.63665556,269.09106265,290.11,313.16,334.845228417,384.760748992,442.00180288,451.91383567,456.697517309,477.277760379,515.37656136072,515.7130985344468] # Radial distance of companion in pixels
 position_angle = [295.9,311.8] # Position angle of companion in degrees
 noise_aperture_pos_comp = (512,512) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
@@ -57,8 +57,10 @@ detect_sigma = 5 # What sigma limit would you like for the detection?
 contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
-## Photometric errors in PSF
-
+## Photometric errors of PSF
+psf_errors = False # Compute the photometric errors of the central star's PSF
+psf_errors_save = False # Save the errors to a file?
+psf_errors_file = "Users/alan/Documents/PhD/Data/IRDIS/QZCar/PSF_errors.txt"
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
@@ -135,7 +137,7 @@ from scipy.integrate import quad, dblquad
 c = 299792458. # Speed of light
 Ro = 6.957e8 # Solar Radius
 sr2pc = 44334448.0068964 # Convert steraradians to parsec
-pxscale = 0.1225 # IRDIS pixel scale in arcsec/pixel
+pxscale = 0.01225 # IRDIS pixel scale in arcsec/pixel
 PA = np.array(position_angle) + 90 # Correct for VIP unconventional rotation axis
 
 ## Open image files
@@ -198,10 +200,10 @@ if snr_maps == True:
 
 ## Collapse the images for better photometry measurement
 cube_wl_coll = np.zeros_like(cube[:,0,:,:])
-for i in range(len(wl)):
-        cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
+# for i in range(len(wl)):
+#         cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
 cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
-# cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
+cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
 #cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
 
 ## Check the collapsed data cubes
@@ -262,9 +264,17 @@ if contrast_curves == True:
     contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
-elif contrast_curves == False:
-    print("No contrast curve")
 
+## PSF error calculation
+if psf_errors == True:
+    psferr = vip_hci.fits.open_fits(psf_filepath) # Open the raw PSFs
+    stddev = np.zeros_like(wl) # Create an array for the stored standard deviation
+    for i in range(len(wl)): # Loop over the wavelengths
+        psferr_med = vip_hci.preproc.cosmetics.cube_crop_frames(psferr[i], size_psf, xy=(32, 32), verbose=True, force=True) # Resize the PSF
+        psf_norm_err, maxflux_err, fwhm_err = vip_hci.metrics.normalize_psf(psferr_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # Measure the maximum flux for each PSF
+        stddev[i] = np.std(maxflux_err,ddof=1) # Calculate the standard deviation for the PSFs
+    if psf_errors_save: # Save the error
+        np.savetxt(stddev, psf_errors_file, delimiter='   ') # Saves to file
 
 # Spectrum extraction with NM
 if extract_spec == True:
@@ -281,7 +291,7 @@ if extract_spec == True:
     simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
     simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
     ## Start Simplex
-    for i in range(3,4):#len(final_sum_K1)):
+    for i in range(len(final_sum_K1)):
         print("Companion index: ", i + 1) # Companions for IRDIS
         comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
         simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
