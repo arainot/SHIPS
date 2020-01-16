@@ -199,7 +199,7 @@ if snr_maps == True:
 # Stellar photometry of the companion
 
 ## Collapse the images for better photometry measurement
-cube_wl_coll = np.zeros_like(cube[:,0,:,:])
+# cube_wl_coll = np.zeros_like(cube[:,0,:,:])
 # for i in range(len(wl)):
 #         cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
 cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north

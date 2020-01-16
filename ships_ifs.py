@@ -200,13 +200,13 @@ if adi_frame == True:
 # Stellar photometry of the companion
 
 ## Collapse the images for better photometry measurement
-# cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
-# cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
-# cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
-cube_wl_coll = np.zeros_like(cube[:,0,:,:])
-for i in range(len(wl)):
-        cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
 cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
+cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
+# cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
+# cube_wl_coll = np.zeros_like(cube[:,0,:,:])
+# for i in range(len(wl)):
+#         cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
+# cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
 
 ## Check the collapsed data cubes
 if see_collapsed_cube == True:
