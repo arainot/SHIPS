@@ -20,7 +20,8 @@ psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_re
 # psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = ([491,456],[559,579],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[519,243],[227,569],[346,778],[847,491],[899,507],[72,533],[819,180],[451,60],[49,396],[732,44],[648,16]) # Companion position in pixels (X,Y)
+comp_pos = ([490,455],[559,579],[687,629],[569,701],[310,485],[695,418],[295,471],[653,706],[517,242],[226,568],[345,776],[846,490],[897,506],[70,532],[818,179],[451,59],[48,397],[730,44],[647,15]) # Companion position in pixels (X,Y)
+#comp_pos = ([492,456],[559,579],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[517,241],[227,569],[344,775],[847,491],[899,507],[72,533],[819,180],[451,60],[49,396],[732,44],[648,16]) # Companion position in pixels (X,Y)
 psf_pos = (32, 32) # PSF position in pixels (X,Y)
 radial_dist = [60.16643583,81.60882305,210.78899402,197.121377136,201.68291946,211,219.,240.63665556,269.09106265,290.11,313.16,334.845228417,384.760748992,442.00180288,451.91383567,456.697517309,477.277760379,515.37656136072,515.7130985344468] # Radial distance of companion in pixels
 position_angle = [295.9,311.8] # Position angle of companion in degrees
@@ -58,12 +59,12 @@ contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
 ## Photometric errors of PSF
-psf_errors = False # Compute the photometric errors of the central star's PSF
-psf_errors_save = False # Save the errors to a file?
-psf_errors_file = "Users/alan/Documents/PhD/Data/IRDIS/QZCar/PSF_errors.txt"
+psf_errors = True # Compute the photometric errors of the central star's PSF
+psf_errors_save = True # Save the errors to a file?
+psf_errors_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/PSF_errors.txt' # Filepath to save the PSF errors
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
-extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
 save_spec = False # Save the spectrum to ascii file
@@ -151,6 +152,7 @@ psf = np.median(psf, axis=1) # Take the median value of all psf observations
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
+centy, centx = vip_hci.var.frame_center(cube[0,0]) # Find the coordinate centers of the frame
 
 ## Check the RAW data cubes
 if see_cube == True:
@@ -274,7 +276,7 @@ if psf_errors == True:
         psf_norm_err, maxflux_err, fwhm_err = vip_hci.metrics.normalize_psf(psferr_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # Measure the maximum flux for each PSF
         stddev[i] = np.std(maxflux_err,ddof=1) # Calculate the standard deviation for the PSFs
     if psf_errors_save: # Save the error
-        np.savetxt(stddev, psf_errors_file, delimiter='   ') # Saves to file
+        np.savetxt(psf_errors_file, stddev, delimiter='   ') # Saves to file
 
 # Spectrum extraction with NM
 if extract_spec == True:
@@ -291,10 +293,21 @@ if extract_spec == True:
     simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
     simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
     ## Start Simplex
-    for i in range(len(final_sum_K1)):
+    for i in range(0,1):
         print("Companion index: ", i + 1) # Companions for IRDIS
+        ### K1
         comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
-        simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
+        simplex_K1 = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=True,plot=False,save=False) # This takes some time
+        x_simplex = simplex_K1[0] * np.cos(np.deg2rad(simplex_K1[1])) + centx
+        y_simplex = simplex_K1[0] * np.sin(np.deg2rad(simplex_K1[1])) + centy
+        comp_xycoord = [[x_simplex[0],y_simplex[0]]] # Companion coords
+        simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=True,plot=False,save=False) # This takes some time
+        ### K2
+        comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
+        simplex_K2 = vip_hci.negfc.firstguess(cube[1],-angs,psf_norm[1],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[1],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K2[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
+        x_simplex = simplex_K2[0] * np.cos(np.deg2rad(simplex_K2[1])) + centx
+        y_simplex = simplex_K2[0] * np.sin(np.deg2rad(simplex_K2[1])) + centy
+        comp_xycoord = [[x_simplex[0],y_simplex[0]]] # Companion coords
         simplex_guess_K2[i] = vip_hci.negfc.firstguess(cube[1],-angs,psf_norm[1],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[1],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K2[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
         print("K1: ", simplex_guess_K1[i])
         print("K2: ", simplex_guess_K2[i])

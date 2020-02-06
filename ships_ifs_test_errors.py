@@ -68,7 +68,7 @@ from scipy.integrate import quad, dblquad
 c = 299792458. # Speed of light
 Ro = 6.957e8 # Solar Radius
 sr2pc = 44334448.0068964 # Convert steraradians to parsec
-pxscale = 0.1225 # IRDIS pixel scale in arcsec/pixel
+pxscale = 0.0074 # IRDIS pixel scale in arcsec/pixel
 PA = np.array(position_angle) + 90 # Correct for VIP unconventional rotation axis
 
 ## Open image files
@@ -90,11 +90,11 @@ psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size
 # Stellar photometry of the companion
 
 ## Collapse the images for better photometry measurement
-cube_wl_coll = np.zeros_like(cube[:,0,:,:])
-for i in range(len(wl)):
-        cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
-#cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
-# cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
+# cube_wl_coll = np.zeros_like(cube[:,0,:,:])
+# for i in range(len(wl)):
+#         cube_wl_coll[i] = vip_hci.hci_postproc.median_sub(cube[i],-angs,fwhm=fwhm[i],verbose=False) # Rotate & collapse along the rotation axis - 3D image
+cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
+cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
 #cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
 
 ## Aperture photometry of companions and PSF
@@ -157,7 +157,7 @@ with open('/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt')
 ## Error estimation
 simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
 centy, centx = vip_hci.var.frame_center(cube[0,0])
-n_samples=15
+n_samples=25
 
 # Load Ad & Ab masked cube
 cube_filepath = '/Users/alan/Desktop/cube_free_IFS.fits'
@@ -192,6 +192,15 @@ for j in range(0,n_samples):
                                                           svd_mode='lapack',f_range=f_range, simplex=True,
                                                           fmerit='sum',scaling=None, simplex_options=simplex_options,
                                                           collapse='median',verbose=False)
+       x_simplex = fake_comp[0] * np.cos(np.deg2rad(fake_comp[1])) + centx
+       y_simplex = fake_comp[0] * np.sin(np.deg2rad(fake_comp_K2[1])) + centy
+       planet_xycoord = [[x_simplex[0],y_simplex[0]]] # Companion coords
+       fake_comp = vip_hci.negfc.simplex_optim.firstguess(cube_inj[i], -angs, psf_norm[i], ncomp=1, plsc=0.0074,
+                                                          fwhm=fwhm[i], annulus_width=3, aperture_radius=2,
+                                                          planets_xy_coord=planet_xycoord, cube_ref=None,
+                                                          svd_mode='lapack',f_range=f_range, simplex=True,
+                                                          fmerit='sum',scaling=None, simplex_options=simplex_options,
+                                                          collapse='median',verbose=False)
        r_mes[j] = fake_comp[0]
        theta_mes[j] = fake_comp[1]
        spectra_mes[i,j] = fake_comp[2]
@@ -200,8 +209,13 @@ std_flux=np.zeros_like(wl)
 std_r=np.sqrt(np.sum(abs(r_inj - np.mean(r_inj))**2)/(n_samples-1))
 std_theta=np.sqrt(np.sum(abs(theta_inj - np.mean(theta_inj))**2)/(n_samples-1))
 std_flux=np.zeros_like(wl)
+spectra_mes_cor = np.array([])
+for i in range(len(wl)):
+    sigma_mean = np.std(spectra_mes[i,:],ddof=1)
+    if abs(spectra_mes[i,:] - np.mean(spectra_mes[i,:])) < 3*sigma_mean:
+        spectra_mes_cor = np.append(spectra_mes_cor,spectra_mes[i])
 for i in range(0,len(wl)):
-   std_flux[i]=np.sqrt(np.sum(abs(spectra_mes[i,:] - np.mean(spectra_mes[i,:]))**2)/(n_samples-1))
+   std_flux[i]=np.sqrt(np.sum(abs(spectra_mes_cor[i,:] - np.mean(spectra_mes_cor[i,:]))**2)/(n_samples-1))
 
 print("Error r_K1: ", std_r)
 print("Error theta_K1: ", std_theta)

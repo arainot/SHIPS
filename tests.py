@@ -429,8 +429,54 @@ std_flux_K2=np.sqrt(np.sum(abs(spectra_mes_K2 - flux_K2)**2)/(n_samples-1))
 
 print(std_r_K1)
 
-std_flux_K2=np.sqrt(np.sum(abs(K2 - 3.196914362045397695e+01)**2)/(13-1))
-
+n_samples = 15
+std_flux_K1 = np.zeros((17))
+f_K1 = np.array([])
+std_flux_K2 = np.zeros((17))
+f_K2 = np.array([])
+with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K1.txt') as f:
+   # header1 = f.readline()
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        f_K1 = np.append(f_K1,float(columns[2]))
+f.close
+with open('/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/VIP_simplex_K2.txt') as f:
+   # header1 = f.readline()
+    for line in f:
+        line = line.strip()
+        columns = line.split()
+        f_K2 = np.append(f_K1,float(columns[2]))
+f.close
+simplex_K1_path = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/Simplex_errors/'
+for i in range(0,17):
+    simplex_flux_K1 = np.zeros((15))
+    simplex_err_K1 = np.array([])
+    simplex_flux_K2 = np.zeros((15))
+    simplex_err_K2 = np.array([])
+    with open(simplex_err_K1_path + 'Simplex_K1_flux_S{}.txt'.format(i),'rb') as f:
+        value = np.zeros(3)
+        j=0
+        for line in f:
+            line = line.strip()
+            simplex_flux_K1[j] = line
+            j+=1
+    with open(simplex_err_K1_path + 'Simplex_K2_flux_S{}.txt'.format(i),'rb') as f:
+        value = np.zeros(3)
+        j=0
+        for line in f:
+            line = line.strip()
+            simplex_flux_K2[j] = line
+            j+=1
+    sigma_mean_K1 = np.std(simplex_flux_K1,ddof=1)
+    sigma_mean_K2 = np.std(simplex_flux_K2,ddof=1)
+    for l in range(len(simplex_flux_K1)):
+        if abs(simplex_flux_K1[l] - f_K1[i]) < 3*sigma_mean_K1:
+            simplex_err_K1 = np.append(simplex_err_K1,simplex_flux_K1[l])
+        if abs(simplex_flux_K2[l] - f_K2[i]) < 3*sigma_mean_K2:
+            simplex_err_K2 = np.append(simplex_err_K2,simplex_flux_K2[l])
+    std_flux_K1[i]=np.sqrt(np.sum(abs(simplex_err_K1 - f_K1[i])**2)/(n_samples))
+    std_flux_K2[i]=np.sqrt(np.sum(abs(simplex_err_K2 - f_K2[i])**2)/(n_samples))
 
 ## Read MCMC
 import pickle # Import important MCMC libraries
@@ -438,7 +484,7 @@ from pickle import Pickler
 pickler={}
 mcmc_result={}
 for i in range(0,2): # Read all channels and store them to variables
-    with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/MCMC/S9S10/QZCarK1_IRDIS_companions_S{}/MCMC_results'.format(i),'rb') as fi:
+    with open('/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/MCMC/S9S10/QZCarK2_IRDIS_companions_S{}/MCMC_results'.format(i),'rb') as fi:
             pickler["myPickler{}".format(i)] = pickle.Unpickler(fi)
             mcmc_result["mcmc_result{}".format(i)] = pickler["myPickler{}".format(i)].load()
 
@@ -494,3 +540,167 @@ for h in range(len(angs)):
             y+=1
         y=0
         x+=1
+
+312.742 * np.cos(np.deg2rad(122.3)) + 511.5
+312.742 * np.sin(np.deg2rad(122.3)) + 511.5
+comp_xycoord = [[344,776]] # Companion coords
+simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=3,aperture_radius=2,simplex_options=simplex_options,f_range=f_range_K1[10],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=True,plot=False,save=False) # This takes some time
+
+
+
+
+radial_dist=[31.9]
+comp_pos = ([539,495])
+for i in range(0,len(radial_dist)):
+    ### Apertures dependent on companions
+    aper_noise_comp = photutils.CircularAnnulus((512,512),radial_dist[i]-5,radial_dist[i]+5)
+    aper_comp_K1 = photutils.CircularAperture((comp_pos[0], comp_pos[1]),1./2*fwhm[0])
+    aper_comp_K2 = photutils.CircularAperture((comp_pos[0], comp_pos[1]),1./2*fwhm[1])
+    ### Flux
+    phot_noise_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_noise_comp)
+    phot_noise_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_noise_comp)
+    phot_K1 = photutils.aperture_photometry(cube_wl_coll[0], aper_comp_K1)
+    phot_K2 = photutils.aperture_photometry(cube_wl_coll[1], aper_comp_K2)
+    bkg_mean_K1 = (phot_noise_K1['aperture_sum']-phot_K1['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K1.area())
+    bkg_mean_K2 = (phot_noise_K2['aperture_sum']-phot_K2['aperture_sum']) / (aper_noise_comp.area()-aper_comp_K2.area())
+    bkg_sum_K1 = bkg_mean_K1 * aper_comp_K1.area()
+    bkg_sum_K2 = bkg_mean_K2 * aper_comp_K2.area()
+    final_sum_K1[i] = phot_K1['aperture_sum'] - bkg_sum_K1
+    final_sum_K2[i] = phot_K2['aperture_sum'] - bkg_sum_K2
+## Define some parameters
+f_guess_pl = max(final_sum_K1) # Flux first guess
+f_range_K1 = np.zeros((len(final_sum_K1),200))
+f_range_K2 = np.zeros((len(final_sum_K2),200))
+for i in range(0,len(final_sum_K1)):
+    f_range_K1[i] = np.linspace(0.2*np.abs(final_sum_K1[i]), 30*np.abs(final_sum_K1[i]),200)
+    f_range_K2[i] = np.linspace(0.2*np.abs(final_sum_K2[i]), 30*np.abs(final_sum_K2[i]),200)
+p_in = np.array([radial_dist,PA]) # Regroup companion positions
+simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
+simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
+simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
+## Start Simplex
+for i in range(len(f_range_K1)):
+    print("Companion index: ", i + 1) # Companions for IRDIS
+    comp_xycoord = [[comp_pos[0],comp_pos[1]]] # Companion coords
+    print(comp_xycoord)
+    print(i)
+    simplex_guess_K1[i] = vip_hci.negfc.firstguess(cube[0],-angs,psf_norm[0],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[0],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K1[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=True,plot=False,save=False) # This takes some time
+    simplex_guess_K2[i] = vip_hci.negfc.firstguess(cube[1],-angs,psf_norm[1],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[1],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range_K2[i],simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False) # This takes some time
+    print("K1: ", simplex_guess_K1[i])
+    print("K2: ", simplex_guess_K2[i])
+
+## Error propagation
+## Angles
+for i in range(len(mcmc_PA_K1)):
+    mcmc_PA_K1[i,1] = np.sqrt(mcmc_PA_K1[i,1]**2+0.08**2)
+    mcmc_PA_K2[i,1] = np.sqrt(mcmc_PA_K2[i,1]**2+0.08**2)
+# for i in range(len(julia_PA_K1)):
+#     julia_PA_K1[i,1] = np.sqrt(julia_PA_K1[i,1]**2+0.08**2)
+#     julia_PA_K2[i,1] = np.sqrt(julia_PA_K2[i,1]**2+0.08**2)
+for i in range(len(simplex_PA_K1)):
+    simplex_PA_K1[i,1] = np.sqrt(simplex_PA_K1[i,1]**2+0.08**2)
+    simplex_PA_K2[i,1] = np.sqrt(simplex_PA_K2[i,1]**2+0.08**2)
+
+## Radii - First convert to
+mcmc_pos_K1_arcsec = np.zeros_like(mcmc_pos_K1)
+mcmc_pos_K2_arcsec = np.zeros_like(mcmc_pos_K2)
+# julia_pos_K1_arcsec = np.zeros_like(julia_pos_K1)
+# julia_pos_K2_arcsec = np.zeros_like(julia_pos_K2)
+simplex_pos_K1_arcsec = np.zeros_like(simplex_pos_K1)
+simplex_pos_K2_arcsec = np.zeros_like(simplex_pos_K2)
+
+mcmc_pos_K1_arcsec[:,0] = mcmc_pos_K1[:,0]*12.25
+mcmc_pos_K2_arcsec[:,0] = mcmc_pos_K2[:,0]*12.25
+# julia_pos_K1_arcsec[:,0] = julia_pos_K1[:,0]*12.25
+# julia_pos_K2_arcsec[:,0] = julia_pos_K2[:,0]*12.25
+simplex_pos_K1_arcsec[:,0] = simplex_pos_K1[:,0]*12.25
+simplex_pos_K2_arcsec[:,0] = simplex_pos_K2[:,0]*12.25
+
+for i in range(len(mcmc_pos_K1)):
+#    mcmc_pos_K1_arcsec[i,1] = np.sqrt((mcmc_pos_K1[i,1]/12.25)**2+(0.021/mcmc_pos_K1[i,0])**2)
+    mcmc_pos_K1_arcsec[i,1] = mcmc_pos_K1_arcsec[i,0] * np.sqrt((mcmc_pos_K1[i,1]/mcmc_pos_K1[i,0])**2+(0.021/12.25)**2)
+    mcmc_pos_K1_arcsec[i,1] = np.sqrt(mcmc_pos_K1_arcsec[i,1]**2+1.2e-3**2)
+    mcmc_pos_K2_arcsec[i,1] = mcmc_pos_K2_arcsec[i,0] * np.sqrt((mcmc_pos_K2[i,1]/mcmc_pos_K2[i,0])**2+(0.021/12.25)**2)
+    mcmc_pos_K2_arcsec[i,1] = np.sqrt(mcmc_pos_K2_arcsec[i,1]**2+1.2e-3**2)
+# for i in range(len(julia_pos_K1)):
+#     julia_pos_K1_arcsec[i,1] = np.sqrt((julia_pos_K1[i,1]/12.25)**2+(0.021/julia_pos_K1[i,0])**2)
+#     julia_pos_K1_arcsec[i,1] = np.sqrt(julia_pos_K1_arcsec[i,1]**2+1.2e-3**2)
+#     julia_pos_K2_arcsec[i,1] = np.sqrt((julia_pos_K2[i,1]/12.25)**2+(0.021/julia_pos_K2[i,0])**2)
+#     julia_pos_K2_arcsec[i,1] = np.sqrt(julia_pos_K2_arcsec[i,1]**2+1.2e-3**2)
+for i in range(len(simplex_pos_K1)):
+    simplex_pos_K1_arcsec[i,1] = simplex_pos_K1_arcsec[i,0] * np.sqrt((simplex_pos_K1[i,1]/simplex_pos_K1[i,0])**2+(0.021/12.25)**2)
+    simplex_pos_K1_arcsec[i,1] = np.sqrt(simplex_pos_K1_arcsec[i,1]**2+1.2e-3**2)
+    simplex_pos_K2_arcsec[i,1] = simplex_pos_K2_arcsec[i,0] * np.sqrt((simplex_pos_K2[i,1]/simplex_pos_K2[i,0])**2+(0.021/12.25)**2)
+    simplex_pos_K2_arcsec[i,1] = np.sqrt(simplex_pos_K2_arcsec[i,1]**2+1.2e-3**2)
+
+hugues_irdis_K1 = np.zeros_like(simplex_pos_K1)
+hugues_irdis_K2 = np.zeros_like(simplex_pos_K2)
+for i in range(len(simplex_pos_K1)):
+    if i < 12:
+        hugues_irdis_K1[i,0] = simplex_flux_K1[i,0]
+        hugues_irdis_K1[i,1] = mcmc_flux_K1[i,1]
+        hugues_irdis_K2[i,0] = simplex_flux_K2[i,0]
+        hugues_irdis_K2[i,1] = mcmc_flux_K2[i,1]
+    else:
+        hugues_irdis_K1[i,0] = simplex_flux_K1[i,0]
+        hugues_irdis_K1[i,1] = julia_flux_K1[i-3,1]
+        hugues_irdis_K2[i,0] = simplex_flux_K2[i,0]
+        hugues_irdis_K2[i,1] = julia_flux_K2[i-3,1]
+hugues_irdis_K1[17,0] = julia_flux_K1[14,0]
+hugues_irdis_K1[18,0] = julia_flux_K1[15,0]
+hugues_irdis_K2[17,0] = julia_flux_K2[14,0]
+hugues_irdis_K2[18,0] = julia_flux_K2[15,0]
+
+mh.acos(
+theta = (julia_x_K1[:,0]-centx)/np.sqrt(julia_x_K1[:,0]**2+julia_y_K1[:,0]**2)
+
+y = unumpy.uarray(julia_y_K1[:,0], julia_y_K1[:,1])
+x = unumpy.uarray(julia_x_K1[:,0], julia_x_K1[:,1])
+r = unumpy.uarray(julia_pos_K1[:,0], julia_pos_K1[:,1])
+julia_PA_K1[0,0] = 360- degrees(acos(abs(y[0]-centy)/r[0]))
+# mh.degrees(mh.acos(np.abs(julia_y_K1[0,0]-centy)/julia_pos_K1[0,0]))
+julia_PA_K1[9,0] = 270-degrees(atan((y[9]-centy)/(x[9]-centx)))
+# mh.degrees(mh.acos(np.abs(julia_x_K1[9,0]-centx)/julia_pos_K1[9,0]))
+#julia_PA_K1[9,1] = np.sqrt(julia_x_K1[9,1]**2/(julia_pos_K1[9,0]**2-(julia_x_K1[9,0]-centx)**2)+((julia_x_K1[9,0]-centx)*julia_pos_K1[9,0]**2)**2*julia_pos_K1[9,1]**2/(julia_pos_K1[9,0]**2-(julia_x_K1[9,0]-centx)**2))
+julia_PA_K1[12,0] = 180-degrees(atan((x[12]-centx)/(y[12]-centy)))
+julia_PA_K1[13,0] = 90+ degrees(atan((y[13]-centy)/(x[13]-centx)))
+julia_PA_K1[14,0] = 180+ degrees(atan((x[14]-centx)/(y[14]-centy)))
+julia_PA_K1[15,0] = 180+ degrees(atan((x[15]-centx)/(y[15]-centy)))
+
+
+## uncertainties method
+from uncertainties import ufloat
+from uncertainties.umath import *
+from uncertainties import unumpy
+y = unumpy.uarray(julia_y_K1[:,0], julia_y_K1[:,1])
+x = unumpy.uarray(julia_x_K1[:,0], julia_x_K1[:,1])
+mc = unumpy.uarray(mcmc_pos_K1[:,0], mcmc_pos_K1[:,1])
+pxscale = unumpy.uarray(12.25,0.021)
+for i in range(len(julia_y_K1)):
+    x = ufloat(julia_y_K1[:,0], julia_y_K1[:,1])
+x = ufloat(julia_y_K1[9,0], julia_y_K1[9,1])
+r = ufloat(julia_pos_K1[9,0], julia_pos_K1[9,1])
+t = degrees(acos(abs(x-centx)/r))
+
+sqrt((x[9]-centx)**2+(y[9]-centy)**2)*pxscale*1e-3*2.3e3/1e3
+sqrt((x[12]-centx)**2+(y[12]-centy)**2)*pxscale*1e-3*2.3e3/1e3
+sqrt((x[13]-centx)**2+(y[13]-centy)**2)*pxscale*1e-3*2.3e3/1e3
+sqrt((x[14]-centx)**2+(y[14]-centy)**2)*pxscale*1e-3*2.3e3/1e3
+sqrt((x[15]-centx)**2+(y[15]-centy)**2)*pxscale*1e-3*2.3e3/1e3
+
+### Distance in AU
+mc*pxscale*1e-3*2.3e3/1e3
+
+### magnitude contrasts
+mc_f_K1 = unumpy.uarray(mcmc_flux_K1[:,0], mcmc_flux_K1[:,1])
+mc_f_K2 = unumpy.uarray(mcmc_flux_K2[:,0], mcmc_flux_K2[:,1])
+jfK1 = unumpy.uarray(julia_flux_K1[:,0], julia_flux_K1[:,1])
+jfK2 = unumpy.uarray(julia_flux_K2[:,0], julia_flux_K2[:,1])
+central_star_flux_K1 = ufloat(2021121.4,21453.893)
+central_star_flux_K2 = ufloat(1149148.6,10503.037)
+jcfK1 = ufloat(3748275.952813,177.215684)
+jcfK2 = ufloat(2158544.286605,121.569173)
+dmag_mcmc_K1 = -2.5*unumpy.log10(mc_f_K1[2:]/central_star_flux_K1)
+dmag_mcmc_K2 = -2.5*unumpy.log10(mc_f_K2[2:]/central_star_flux_K2)
+dmag_julia_K1 = -2.5*unumpy.log10(jfK1/jcfK1)
+dmag_julia_K2 = -2.5*unumpy.log10(jfK2/jcfK2)
