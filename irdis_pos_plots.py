@@ -66,6 +66,9 @@ PA_K1_err = False
 PA_K2_err = False
 flux_K1_err = False
 flux_K2_err = False
+
+flux_K1_julia = False
+
 dmag_simplex_K1_mcmc = False
 dmag_simplex_K2_mcmc = False
 
@@ -82,8 +85,16 @@ x_mcmc_K2_julia = False
 y_mcmc_K2_julia = False
 dmag_mcmc_K1_julia = False
 dmag_mcmc_K2_julia = False
-dmag_mcmc_K1_K2 = True
-dmag_julia_K1_K2 = True
+dmag_mcmc_K1_K2 = False
+dmag_julia_K1_K2 = False
+dmag_all_K1 = True
+dmag_all_K2 = True
+
+pos_all_K1 = True
+pos_all_K2 = True
+
+PA_all_K1 = True
+PA_all_K2 = True
 
 # Define arrays
 mcmc_pos_K1 = np.zeros((15,2))
@@ -626,6 +637,39 @@ if flux_K2 == True:
     plt.errorbar(0, simplex_flux_K2[18,0],yerr=simplex_flux_K2[18,1],fmt='--o',c=colors[18],label= "S16")
     x = np.linspace(0,10,num=2)
     plt.plot(x,x,lw=2.8,c="royalblue",alpha=0.5)
+    plt.legend(prop={'size': 12})
+    plt.show()
+
+## Flux K1 Julia vs simplex
+if flux_K1_julia == True:
+
+    plt.grid(True)
+    plt.legend()
+    plt.figure(figsize=(12, 9))
+    ax = plt.subplot(111)
+    ax = plt.subplot(111)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("Flux Julia", fontsize=20)
+    plt.xlabel('Flux Simplex', fontsize=20)
+    plt.title("Flux - K1")
+    plt.errorbar(simplex_flux_K1[3,0],julia_flux_K1[0,0],xerr=simplex_flux_K1[3,1],yerr=julia_flux_K1[0,1],fmt='--o',c=colors[3],label= "S1")
+    plt.errorbar(simplex_flux_K1[4,0],julia_flux_K1[1,0],xerr=simplex_flux_K1[4,1],yerr=julia_flux_K1[1,1],fmt='--o',c=colors[4],label= "S2")
+    plt.errorbar(simplex_flux_K1[5,0],julia_flux_K1[2,0],xerr=simplex_flux_K1[5,1],yerr=julia_flux_K1[2,1],fmt='--o',c=colors[5],label= "S3")
+    plt.errorbar(simplex_flux_K1[6,0],julia_flux_K1[3,0],xerr=simplex_flux_K1[6,1],yerr=julia_flux_K1[3,1],fmt='--o',c=colors[6],label= "S4")
+    plt.errorbar(simplex_flux_K1[7,0],julia_flux_K1[4,0],xerr=simplex_flux_K1[7,1],yerr=julia_flux_K1[4,1],fmt='--o',c=colors[7],label= "S5")
+    plt.errorbar(simplex_flux_K1[8,0],julia_flux_K1[5,0],xerr=simplex_flux_K1[8,1],yerr=julia_flux_K1[5,1],fmt='--o',c=colors[8],label= "S6")
+    plt.errorbar(simplex_flux_K1[9,0],julia_flux_K1[6,0],xerr=simplex_flux_K1[9,1],yerr=julia_flux_K1[6,1],fmt='--o',c=colors[9],label= "S7")
+    plt.errorbar(simplex_flux_K1[10,0],julia_flux_K1[7,0],xerr=simplex_flux_K1[10,1],yerr=julia_flux_K1[7,1],fmt='--o',c=colors[10],label= "S8")
+    plt.errorbar(simplex_flux_K1[11,0],julia_flux_K1[8,0],xerr=simplex_flux_K1[11,1],yerr=julia_flux_K1[8,1],fmt='--o',c=colors[11],label= "S9")
+    plt.errorbar(simplex_flux_K1[12,0],julia_flux_K1[9,0],xerr=simplex_flux_K1[12,1],yerr=julia_flux_K1[9,1],fmt='--o',c=colors[12],label= "S10")
+    plt.errorbar(simplex_flux_K1[13,0],julia_flux_K1[10,0],xerr=simplex_flux_K1[13,1],yerr=julia_flux_K1[10,1],fmt='--o',c=colors[13],label= "S11")
+    plt.errorbar(simplex_flux_K1[14,0],julia_flux_K1[11,0],xerr=simplex_flux_K1[14,1],yerr=julia_flux_K1[11,1],fmt='--o',c=colors[14],label= "S12")
+    x = np.linspace(10,90,num=2)
+    plt.plot(x,x,lw=2.8,c="black")
     plt.legend(prop={'size': 12})
     plt.show()
 
@@ -1595,6 +1639,38 @@ if dmag_simplex_K1_mcmc == True:
     plt.legend(prop={'size': 12})
     plt.show()
 
+    plt.grid(True)
+    plt.legend()
+    plt.figure(figsize=(12, 9))
+    ax = plt.subplot(111)
+    ax = plt.subplot(111)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("$\Delta m_{simplex}$", fontsize=20)
+    plt.xlabel('$\Delta m_{MCMC}$', fontsize=20)
+    plt.title("$\Delta m$ - K1")
+    # plt.errorbar(mcmc_dmag_K1[0,0],simplex_dmag_K1[0,0],xerr=mcmc_dmag_K1[0,1],yerr=simplex_dmag_K1[0,1],fmt='--o',c=colors[0],label= "Ad")
+    # plt.errorbar(mcmc_dmag_K1[2,0],simplex_dmag_K1[2,0],xerr=mcmc_dmag_K1[2,1],yerr=simplex_dmag_K1[2,1],fmt='--o',c=colors[2],label= "E")
+    plt.errorbar(simplex_dmag_K1[3,0],simplex_dmag_K1[3,0],xerr=mcmc_dmag_K1[3,1],yerr=simplex_dmag_K1[3,1],fmt='--o',c=colors[3],label= "S1")
+    plt.errorbar(simplex_dmag_K1[4,0],simplex_dmag_K1[4,0],xerr=mcmc_dmag_K1[4,1],yerr=simplex_dmag_K1[4,1],fmt='--o',c=colors[4],label= "S2")
+    plt.errorbar(simplex_dmag_K1[5,0],simplex_dmag_K1[5,0],xerr=mcmc_dmag_K1[5,1],yerr=simplex_dmag_K1[5,1],fmt='--o',c=colors[5],label= "S3")
+    plt.errorbar(simplex_dmag_K1[6,0],simplex_dmag_K1[6,0],xerr=mcmc_dmag_K1[6,1],yerr=simplex_dmag_K1[6,1],fmt='--o',c=colors[6],label= "S4")
+    plt.errorbar(simplex_dmag_K1[7,0],simplex_dmag_K1[7,0],xerr=mcmc_dmag_K1[7,1],yerr=simplex_dmag_K1[7,1],fmt='--o',c=colors[7],label= "S5")
+    plt.errorbar(simplex_dmag_K1[8,0],simplex_dmag_K1[8,0],xerr=mcmc_dmag_K1[8,1],yerr=simplex_dmag_K1[8,1],fmt='--o',c=colors[8],label= "S6")
+    plt.errorbar(simplex_dmag_K1[9,0],simplex_dmag_K1[9,0],xerr=mcmc_dmag_K1[9,1],yerr=simplex_dmag_K1[9,1],fmt='--o',c=colors[9],label= "S7")
+    plt.errorbar(simplex_dmag_K1[10,0],simplex_dmag_K1[10,0],xerr=mcmc_dmag_K1[10,1],yerr=simplex_dmag_K1[10,1],fmt='--o',c=colors[10],label= "S8")
+    plt.errorbar(simplex_dmag_K1[11,0],simplex_dmag_K1[11,0],xerr=mcmc_dmag_K1[11,1],yerr=simplex_dmag_K1[11,1],fmt='--o',c=colors[11],label= "S9")
+    plt.errorbar(simplex_dmag_K1[12,0],simplex_dmag_K1[12,0],xerr=mcmc_dmag_K1[12,1],yerr=simplex_dmag_K1[12,1],fmt='--o',c=colors[12],label= "S10")
+    plt.errorbar(simplex_dmag_K1[13,0],simplex_dmag_K1[13,0],xerr=mcmc_dmag_K1[13,1],yerr=simplex_dmag_K1[13,1],fmt='--o',c=colors[13],label= "S11")
+    plt.errorbar(simplex_dmag_K1[14,0],simplex_dmag_K1[14,0],xerr=mcmc_dmag_K1[14,1],yerr=simplex_dmag_K1[14,1],fmt='--o',c=colors[14],label= "S12")
+    x = np.linspace(11,13.5,num=2)
+    plt.plot(x,x,lw=2.8,c="black")
+    plt.legend(prop={'size': 12})
+    plt.show()
+
 ## Comparison with simplex Dmag K2
 if dmag_simplex_K2_mcmc == True:
 
@@ -1628,4 +1704,156 @@ if dmag_simplex_K2_mcmc == True:
     x = np.linspace(11,13.5,num=2)
     plt.plot(x,x,lw=2.8,c="black")
     plt.legend(prop={'size': 12})
+    plt.show()
+
+## Comparison of dmag for all three techniques
+if dmag_all_K1 == True:
+
+    mcmc_Sources = np.arange(0.8, 19.8) # Define the positions where the magnitude contrasts will sit for MCMC
+    simplex_Sources = np.arange(1, 20) # Define the positions where the magnitude contrasts will sit for Simplex
+    julia_Sources = np.arange(4.2, 20.2) # Define the positions where the magnitude contrasts will sit for Julia
+
+    plt.grid(True)
+    plt.legend()
+    plt.figure(figsize=(12, 9))
+    ax = plt.subplot(111)
+    ax = plt.subplot(111)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    # plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.5)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("$\Delta m_{K_{1}}$", fontsize=20)
+    plt.xlabel('Source', fontsize=20)
+    # plt.title("$\Delta m$ - K1")
+    plt.xticks(np.arange(4,20), ('S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16'))
+    # plt.errorbar(mcmc_Sources[0],mcmc_dmag_K1[0,0],yerr=mcmc_dmag_K1[0,1],fmt='--o',c=colors[0])
+    # plt.errorbar(mcmc_Sources[1],mcmc_dmag_K1[1,0],yerr=mcmc_dmag_K1[1,1],fmt='--o',c=colors[0])
+    # plt.errorbar(mcmc_Sources[2],mcmc_dmag_K1[2,0],yerr=mcmc_dmag_K1[2,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[3],mcmc_dmag_K1[3,0],yerr=mcmc_dmag_K1[3,1],fmt='--o',c=colors[0],label= "MCMC")
+    plt.errorbar(mcmc_Sources[4],mcmc_dmag_K1[4,0],yerr=mcmc_dmag_K1[4,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[5],mcmc_dmag_K1[5,0],yerr=mcmc_dmag_K1[5,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[6],mcmc_dmag_K1[6,0],yerr=mcmc_dmag_K1[6,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[7],mcmc_dmag_K1[7,0],yerr=mcmc_dmag_K1[7,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[8],mcmc_dmag_K1[8,0],yerr=mcmc_dmag_K1[8,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[9],mcmc_dmag_K1[9,0],yerr=mcmc_dmag_K1[9,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[10],mcmc_dmag_K1[10,0],yerr=mcmc_dmag_K1[10,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[11],mcmc_dmag_K1[11,0],yerr=mcmc_dmag_K1[11,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[12],mcmc_dmag_K1[12,0],yerr=mcmc_dmag_K1[12,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[13],mcmc_dmag_K1[13,0],yerr=mcmc_dmag_K1[13,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[14],mcmc_dmag_K1[14,0],yerr=mcmc_dmag_K1[14,1],fmt='--o',c=colors[0])
+
+    # plt.errorbar(simplex_Sources[0],simplex_dmag_K1[0,0],yerr=simplex_dmag_K1[0,1],fmt='--o',c=colors[5])
+    # plt.errorbar(simplex_Sources[1],simplex_dmag_K1[1,0],yerr=simplex_dmag_K1[1,1],fmt='--o',c=colors[5])
+    # plt.errorbar(simplex_Sources[2],simplex_dmag_K1[2,0],yerr=simplex_dmag_K1[2,1],fmt='--o',c=colors[5])
+    plt.errorbar(simplex_Sources[3],simplex_dmag_K1[3,0],yerr=simplex_dmag_K1[3,1],fmt='--o',c=colors[3],label= "Simplex")
+    plt.errorbar(simplex_Sources[4],simplex_dmag_K1[4,0],yerr=simplex_dmag_K1[4,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[5],simplex_dmag_K1[5,0],yerr=simplex_dmag_K1[5,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[6],simplex_dmag_K1[6,0],yerr=simplex_dmag_K1[6,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[7],simplex_dmag_K1[7,0],yerr=simplex_dmag_K1[7,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[8],simplex_dmag_K1[8,0],yerr=simplex_dmag_K1[8,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[9],simplex_dmag_K1[9,0],yerr=simplex_dmag_K1[9,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[10],simplex_dmag_K1[10,0],yerr=simplex_dmag_K1[10,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[11],simplex_dmag_K1[11,0],yerr=simplex_dmag_K1[11,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[12],simplex_dmag_K1[12,0],yerr=simplex_dmag_K1[12,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[13],simplex_dmag_K1[13,0],yerr=simplex_dmag_K1[13,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[14],simplex_dmag_K1[14,0],yerr=simplex_dmag_K1[14,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[15],simplex_dmag_K1[15,0],yerr=simplex_dmag_K1[15,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[16],simplex_dmag_K1[16,0],yerr=simplex_dmag_K1[16,1],fmt='--o',c=colors[3])
+
+    plt.errorbar(julia_Sources[0],julia_dmag_K1[0,0],yerr=julia_dmag_K1[0,1],fmt='--o',c=colors[14],label= "PSF-fitting")
+    plt.errorbar(julia_Sources[1],julia_dmag_K1[1,0],yerr=julia_dmag_K1[1,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[2],julia_dmag_K1[2,0],yerr=julia_dmag_K1[2,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[3],julia_dmag_K1[3,0],yerr=julia_dmag_K1[3,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[4],julia_dmag_K1[4,0],yerr=julia_dmag_K1[4,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[5],julia_dmag_K1[5,0],yerr=julia_dmag_K1[5,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[6],julia_dmag_K1[6,0],yerr=julia_dmag_K1[6,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[7],julia_dmag_K1[7,0],yerr=julia_dmag_K1[7,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[8],julia_dmag_K1[8,0],yerr=julia_dmag_K1[8,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[9],julia_dmag_K1[9,0],yerr=julia_dmag_K1[9,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[10],julia_dmag_K1[10,0],yerr=julia_dmag_K1[10,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[11],julia_dmag_K1[11,0],yerr=julia_dmag_K1[11,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[12],julia_dmag_K1[12,0],yerr=julia_dmag_K1[12,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[13],julia_dmag_K1[13,0],yerr=julia_dmag_K1[13,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[14],julia_dmag_K1[14,0],yerr=julia_dmag_K1[14,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[15],julia_dmag_K1[15,0],yerr=julia_dmag_K1[15,1],fmt='--o',c=colors[14])
+
+    plt.legend(prop={'size': 15})
+    plt.show()
+
+## Comparison of dmag for all three techniques
+if dmag_all_K2 == True:
+
+    mcmc_Sources = np.arange(0.8, 19.8) # Define the positions where the magnitude contrasts will sit for MCMC
+    simplex_Sources = np.arange(1, 20) # Define the positions where the magnitude contrasts will sit for Simplex
+    julia_Sources = np.arange(4.2, 20.2) # Define the positions where the magnitude contrasts will sit for Julia
+
+    plt.grid(True)
+    plt.legend()
+    plt.figure(figsize=(12, 9))
+    ax = plt.subplot(111)
+    ax = plt.subplot(111)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    # plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+    plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.5)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("$\Delta m_{K_{2}}$", fontsize=20)
+    plt.xlabel('Source', fontsize=20)
+    # plt.title("$\Delta m$ - K2")
+    plt.xticks(np.arange(4,20), ('S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16'))
+    # plt.errorbar(mcmc_Sources[0],mcmc_dmag_K2[0,0],yerr=mcmc_dmag_K2[0,1],fmt='--o',c=colors[0])
+    # plt.errorbar(mcmc_Sources[1],mcmc_dmag_K2[1,0],yerr=mcmc_dmag_K2[1,1],fmt='--o',c=colors[0])
+    # plt.errorbar(mcmc_Sources[2],mcmc_dmag_K2[2,0],yerr=mcmc_dmag_K2[2,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[3],mcmc_dmag_K2[3,0],yerr=mcmc_dmag_K2[3,1],fmt='--o',c=colors[0],label= "MCMC")
+    plt.errorbar(mcmc_Sources[4],mcmc_dmag_K2[4,0],yerr=mcmc_dmag_K2[4,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[5],mcmc_dmag_K2[5,0],yerr=mcmc_dmag_K2[5,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[6],mcmc_dmag_K2[6,0],yerr=mcmc_dmag_K2[6,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[7],mcmc_dmag_K2[7,0],yerr=mcmc_dmag_K2[7,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[8],mcmc_dmag_K2[8,0],yerr=mcmc_dmag_K2[8,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[9],mcmc_dmag_K2[9,0],yerr=mcmc_dmag_K2[9,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[10],mcmc_dmag_K2[10,0],yerr=mcmc_dmag_K2[10,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[11],mcmc_dmag_K2[11,0],yerr=mcmc_dmag_K2[11,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[12],mcmc_dmag_K2[12,0],yerr=mcmc_dmag_K2[12,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[13],mcmc_dmag_K2[13,0],yerr=mcmc_dmag_K2[13,1],fmt='--o',c=colors[0])
+    plt.errorbar(mcmc_Sources[14],mcmc_dmag_K2[14,0],yerr=mcmc_dmag_K2[14,1],fmt='--o',c=colors[0])
+
+    # plt.errorbar(simplex_Sources[0],simplex_dmag_K2[0,0],yerr=simplex_dmag_K2[0,1],fmt='--o',c=colors[5])
+    # plt.errorbar(simplex_Sources[1],simplex_dmag_K2[1,0],yerr=simplex_dmag_K2[1,1],fmt='--o',c=colors[5])
+    # plt.errorbar(simplex_Sources[2],simplex_dmag_K2[2,0],yerr=simplex_dmag_K2[2,1],fmt='--o',c=colors[5])
+    plt.errorbar(simplex_Sources[3],simplex_dmag_K2[3,0],yerr=simplex_dmag_K2[3,1],fmt='--o',c=colors[3],label= "Simplex")
+    plt.errorbar(simplex_Sources[4],simplex_dmag_K2[4,0],yerr=simplex_dmag_K2[4,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[5],simplex_dmag_K2[5,0],yerr=simplex_dmag_K2[5,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[6],simplex_dmag_K2[6,0],yerr=simplex_dmag_K2[6,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[7],simplex_dmag_K2[7,0],yerr=simplex_dmag_K2[7,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[8],simplex_dmag_K2[8,0],yerr=simplex_dmag_K2[8,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[9],simplex_dmag_K2[9,0],yerr=simplex_dmag_K2[9,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[10],simplex_dmag_K2[10,0],yerr=simplex_dmag_K2[10,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[11],simplex_dmag_K2[11,0],yerr=simplex_dmag_K2[11,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[12],simplex_dmag_K2[12,0],yerr=simplex_dmag_K2[12,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[13],simplex_dmag_K2[13,0],yerr=simplex_dmag_K2[13,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[14],simplex_dmag_K2[14,0],yerr=simplex_dmag_K2[14,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[15],simplex_dmag_K2[15,0],yerr=simplex_dmag_K2[15,1],fmt='--o',c=colors[3])
+    plt.errorbar(simplex_Sources[16],simplex_dmag_K2[16,0],yerr=simplex_dmag_K2[16,1],fmt='--o',c=colors[3])
+
+    plt.errorbar(julia_Sources[0],julia_dmag_K2[0,0],yerr=julia_dmag_K2[0,1],fmt='--o',c=colors[14],label= "PSF-fitting")
+    plt.errorbar(julia_Sources[1],julia_dmag_K2[1,0],yerr=julia_dmag_K2[1,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[2],julia_dmag_K2[2,0],yerr=julia_dmag_K2[2,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[3],julia_dmag_K2[3,0],yerr=julia_dmag_K2[3,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[4],julia_dmag_K2[4,0],yerr=julia_dmag_K2[4,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[5],julia_dmag_K2[5,0],yerr=julia_dmag_K2[5,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[6],julia_dmag_K2[6,0],yerr=julia_dmag_K2[6,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[7],julia_dmag_K2[7,0],yerr=julia_dmag_K2[7,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[8],julia_dmag_K2[8,0],yerr=julia_dmag_K2[8,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[9],julia_dmag_K2[9,0],yerr=julia_dmag_K2[9,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[10],julia_dmag_K2[10,0],yerr=julia_dmag_K2[10,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[11],julia_dmag_K2[11,0],yerr=julia_dmag_K2[11,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[12],julia_dmag_K2[12,0],yerr=julia_dmag_K2[12,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[13],julia_dmag_K2[13,0],yerr=julia_dmag_K2[13,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[14],julia_dmag_K2[14,0],yerr=julia_dmag_K2[14,1],fmt='--o',c=colors[14])
+    plt.errorbar(julia_Sources[15],julia_dmag_K2[15,0],yerr=julia_dmag_K2[15,1],fmt='--o',c=colors[14])
+
+    plt.legend(prop={'size': 15})
     plt.show()

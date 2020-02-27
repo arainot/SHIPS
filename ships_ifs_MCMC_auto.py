@@ -20,18 +20,20 @@ angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortfra
 psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
-psf_pos = (32, 33) # PSF position in pixels (X,Y)
-radial_dist = 97. # Radial distance of companion in pixels
+comp_pos = (128.,168.) # Companion position in pixels from the center of the frame (X,Y)
+psf_pos = (32, 32) # PSF position in pixels (X,Y)
+frame_cent = (145,145) # Center of the frame
+radial_dist = 28.6 # Radial distance of companion in pixels
 position_angle = 159.  # Position angle of companion in degrees
-noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+noise_aperture_pos_comp = (23,33) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
 ## Computing power
 ncores = 4 # Number of cores you are willing to share for the computation
 
 ## PCA
-ncomp_pca = 1 # Number of principal components for PCA
+ncomp_pca = 0 # Number of principal components for PCA
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
 sspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
@@ -41,7 +43,7 @@ extract_mcmc = True # Will compute the MCMC for all 39 wavelengths !! This takes
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
 source = 'HD93403' # Give name for your source
-mcmc_path = '/home/alan/Documents/Thesis/SPHERE/spectra/HD93403/mcmc11/' # Directory where MCMC results will be stored
+mcmc_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/mcmc/' # Directory where MCMC results will be stored
 plot_mcmc = False # Plot the mcmc errors with simplex?
 
 # ---------------------------------------------------------------------------
@@ -91,45 +93,8 @@ flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
 
 ## Get FWHM of images & normalised PSF
-psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf, fwhm='fit', size=31,verbose=False,full_output=True) # maxflux is a dummy variable
-
-# # Stellar photometry of the companion
-#
-# ## Collapse the images for better photometry measurement
-# cube_derot = vip_hci.preproc.cube_derotate(cube,angs) # Rotate the images to the same north
-# cube_wl_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=True) # Collapse along the rotation axis - 3D image
-# cube_coll = vip_hci.preproc.cube_collapse(cube_derot,wl_cube=False) # Collapse along the wavelength axis - 2D image
-#
-# ## Aperture photometry of companions and PSF
-#
-# ### Define photometry
-# noise_phot = np.zeros_like(wl) #Noise photometry
-# psf_final_sum = np.zeros_like(wl) #PSF photometry
-# final_sum = np.zeros_like(wl) #Companion photometry
-#
-# ### Apertures
-# aper_noise_comp = photutils.CircularAnnulus((145,145),noise_aperture_pos_comp[0],noise_aperture_pos_comp[1])
-# aper_noise_psf = photutils.CircularAnnulus(psf_pos,noise_aperture_pos_psf[0],noise_aperture_pos_psf[1])
-#
-# ### Aperture photometry
-# for i in range(0,wl.shape[0]):
-#     ### Apertures dependent on channel
-#     aper_comp = photutils.CircularAperture(comp_pos, 1./2*fwhm[i])
-#     aper_psf = photutils.CircularAperture(psf_pos, 1./2*fwhm[i])
-#     ### Noise
-#     phot_noise = photutils.aperture_photometry(cube_wl_coll[i], aper_noise_comp)
-#     noise_phot[i] = np.array(phot_noise['aperture_sum'])
-#     ### PSF
-#     phot_psf = photutils.aperture_photometry(psf[i], aper_psf)
-#     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
-#     psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area
-#     psf_bkg_sum = psf_bkg_mean * aper_psf.area
-#     psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
-#     ### Companion
-#     phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
-#     bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area-aper_comp.area)
-#     bkg_sum = bkg_mean * aper_comp.area
-#     final_sum[i] = phot['aperture_sum'] - bkg_sum
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
 
 # Spectrum extraction with NM
 f = open(sspec_file,'r') # Read the spectrum file

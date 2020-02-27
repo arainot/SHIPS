@@ -9,21 +9,20 @@
 # Set up your parameters
 
 ## Define images to analyse
-cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-#cube_filepath = '/Users/alan/Desktop/cube_free_E.fits'
-wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/Hugues_data/IRDIS/CEN3/ird_convert_recenter_dc-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
+cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
+angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = ([490,455],[559,579],[687,629],[569,701],[310,485],[695,418],[295,471],[653,706],[517,242],[226,568],[345,776],[846,490],[897,506],[70,532],[818,179],[451,59],[48,397],[730,44],[647,15]) # Companion position in pixels (X,Y)
+comp_pos = ([513,609],[418,358],[286,590],[596,743],[620,258],[735,754],[422,881],[857,763],[84,434],[65,588],[535,29]) # Companion position in pixels (X,Y)
 #comp_pos = ([492,456],[559,579],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[517,241],[227,569],[344,775],[847,491],[899,507],[72,533],[819,180],[451,60],[49,396],[732,44],[648,16]) # Companion position in pixels (X,Y)
 psf_pos = (32, 32) # PSF position in pixels (X,Y)
-radial_dist = [60.16643583,81.60882305,210.78899402,197.121377136,201.68291946,211,219.,240.63665556,269.09106265,290.11,313.16,334.845228417,384.760748992,442.00180288,451.91383567,456.697517309,477.277760379,515.37656136072,515.7130985344468] # Radial distance of companion in pixels
+radial_dist = [98.0204060387,179.047479737,238.465930481,247.080958392,275.481396831,330.492057393,380.553544196,428.042054009,433.887082085,452.598055674,482.597140481]# Radial distance of companion in pixels
 position_angle = [295.9,311.8] # Position angle of companion in degrees
 noise_aperture_pos_comp = (512,512) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
@@ -36,7 +35,8 @@ see_cube = False # Original cube
 see_collapsed_cube = False # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
-size_psf = 31
+size_psf = 23
+
 ## PCA
 ncomp_pca = 1 # Number of principal components for PCA
 opti_pca = False # Optimise the number of PCA components?
@@ -44,13 +44,13 @@ source = (501,525) # Source where to optimise the PCA
 
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
-snr_map_file = '/home/alan/data/Backup_macbook/SPHERE/IRDIS/QZCar/SNRmap_VIP.fits' # Finish the file with .fits
+snr_map_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/SNRmap_VIP_n1.fits' # Finish the file with .fits
 
 ## Detection
 adi_frame = False # Would you like to apply ADI on the frame?
 adi_plot = False # Would you like to see the resulting plot?
-adi_min_scale = -1 # Minimum colour scale for the ADI plot
-adi_max_scale = 3 # Maximum colour scale for the ADI plot
+adi_min_scale = -0.2 # Minimum colour scale for the ADI plot
+adi_max_scale = 0.2 # Maximum colour scale for the ADI plot
 detection = False # Would you like the algorithm to detect sources for you? !! WARNING: this is a simple detection !!
 detect_sigma = 5 # What sigma limit would you like for the detection?
 
@@ -59,8 +59,8 @@ contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
 ## Photometric errors of PSF
-psf_errors = True # Compute the photometric errors of the central star's PSF
-psf_errors_save = True # Save the errors to a file?
+psf_errors = False # Compute the photometric errors of the central star's PSF
+psf_errors_save = False # Save the errors to a file?
 psf_errors_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/PSF_errors.txt' # Filepath to save the PSF errors
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
@@ -196,7 +196,7 @@ if adi_frame == True:
 if snr_maps == True:
     snrmap = vip_hci.metrics.snrmap(vip_hci.pca.pca(cube, -angs, scale_list=wl, ncomp=ncomp_pca, verbose=True), fwhm[0], nproc=ncores, plot=True)
     vip_hci.fits.write_fits(snr_map_file,snrmap) # Write SNR maps to file
-    sys.exit("SNR maps created. To continue, please input follow from the beginning process.")
+    sys.exit("SNR maps created. To continue, please continue from the beginning process.")
 
 # Stellar photometry of the companion
 

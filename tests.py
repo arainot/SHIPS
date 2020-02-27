@@ -704,3 +704,161 @@ dmag_mcmc_K1 = -2.5*unumpy.log10(mc_f_K1[2:]/central_star_flux_K1)
 dmag_mcmc_K2 = -2.5*unumpy.log10(mc_f_K2[2:]/central_star_flux_K2)
 dmag_julia_K1 = -2.5*unumpy.log10(jfK1/jcfK1)
 dmag_julia_K2 = -2.5*unumpy.log10(jfK2/jcfK2)
+
+for i in range(len(x)):
+    print(-2.5*mh.log10(x[i]))
+
+comp_pos = ([513,609],[418,358],[286,590],[596,743],[620,258],[735,754],[422,881],[857,763],[84,434],[65,588],[535,29])
+for i in range(len(comp_pos)):
+    r = np.sqrt((comp_pos[i][0]-511)**2+(comp_pos[i][1]-511)**2)
+    print(r)
+
+
+# PSF modifications: from QZ Car to HD93129A
+psf_pos = (32, 32) # PSF position in pixels (X,Y)
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+psf = vip_hci.fits.open_fits(psf_filepath)
+psf = np.median(psf, axis=1) # Take the median of all PSFs
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
+psf_norm_orig, maxflux_orig, fwhm_orig = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
+
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_convert_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+psf = vip_hci.fits.open_fits(psf_filepath)
+psf = np.median(psf, axis=1) # Take the median of all PSFs
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
+
+psf_mod = np.zeros_like(psf)
+for i in range(len(maxflux)):
+    psf_mod[i] = psf[i] * maxflux_orig[i] / maxflux[i]
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf_mod, size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
+psf_norm, maxflux_new, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
+
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
+psf = vip_hci.fits.open_fits(psf_filepath)
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
+psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
+
+
+# IFS plots
+
+sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Filepath to save the Simplex spectrum
+f = open(sspec_file,'r') # Read the spectrum file
+simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
+j=0 # Iterator for the simplex variable
+for line in f:
+    line = line.strip()
+    columns = line.split()
+    simplex_guess[j][0] = float(columns[0])
+    simplex_guess[j][1] = float(columns[1])
+    simplex_guess[j][2] = float(columns[2])
+    j+=1
+f.close()
+
+mcmc_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/IFS_MCMC_flux.txt' # Filepath to save the Simplex spectrum
+f = open(mcmc_file,'r') # Read the spectrum file
+mcmc = np.zeros((39,2)) # Set the simplex variable: r, PA, flux
+j=0 # Iterator for the simplex variable
+for line in f:
+    line = line.strip()
+    columns = line.split()
+    mcmc[j][0] = float(columns[0])
+    mcmc[j][1] = float(columns[1])
+    j+=1
+f.close()
+
+plt.figure(figsize=(12, 9))
+#plt.title('Aperture Photometry IFS')
+#plt.legend()
+# ax.get_xaxis().tick_bottom()
+# ax.get_yaxis().tick_left()
+# plt.ylim(0, 1.1*max(simplex_flux))
+plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+#plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.3)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.ylabel("Flux [ADU/s]", fontsize=20)
+plt.xlabel('Wavelength [$\mathring{A}$]', fontsize=20)
+plt.plot(wl*1e4, simplex_guess[:,2],lw=2.8,label="Simplex")
+plt.plot(wl*1e4, mcmc[:,0],lw=2.8,label="MCMC")
+plt.fill_between(wl*1e4, mcmc[:,0] - mcmc[:,1],
+                  mcmc[:,0] + mcmc[:,1], color="lightsteelblue")
+plt.legend()
+plt.show()
+
+psferr_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/PSF_errors.txt' # Filepath to save the Simplex spectrum
+f = open(psferr_file,'r') # Read the spectrum file
+psferr = np.zeros((39)) # Set the simplex variable: r, PA, flux
+j=0 # Iterator for the simplex variable
+for line in f:
+    line = line.strip()
+    columns = line.split()
+    psferr[j] = float(columns[0])
+    j+=1
+f.close()
+
+qzcar_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/FASTWIND.txt' # Filepath to save the Simplex spectrum
+f = open(qzcar_file,'r') # Read the spectrum file
+qzcar = np.zeros((39)) # Set the simplex variable: r, PA, flux
+j=0 # Iterator for the simplex variable
+for line in f:
+    line = line.strip()
+    columns = line.split()
+    qzcar[j] = float(columns[0])
+    j+=1
+f.close()
+
+lss_file = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/IRDIS_LSS.txt' # Filepath to save the Simplex spectrum
+f = open(lss_file,'r') # Read the spectrum file
+lss = np.zeros((350)) # Set the simplex variable: r, PA, flux
+j=0 # Iterator for the simplex variable
+for line in f:
+    line = line.strip()
+    columns = line.split()
+    lss[j] = float(columns[0])
+    j+=1
+f.close()
+
+wllss_file = '/Users/alan/Nextcloud/PhD/Thesis/SPHERE/spectra/IRDIS_LSS_wl.txt' # Filepath to save the Simplex spectrum
+f = open(wllss_file,'r') # Read the spectrum file
+wl_lss = np.zeros((350)) # Set the simplex variable: r, PA, flux
+j=0 # Iterator for the simplex variable
+for line in f:
+    line = line.strip()
+    columns = line.split()
+    wl_lss[j] = float(columns[0])
+    j+=1
+f.close()
+
+from uncertainties import ufloat
+from uncertainties.umath import *
+from uncertainties import unumpy
+### magnitude contrasts
+mcmcf = unumpy.uarray(mcmc[:,0], mcmc[:,1])
+simplex = unumpy.uarray(simplex_guess[:,2], mcmc[:,1])
+# simplex = unumpy.uarray(simplex_guess[:,2],err)
+psf = unumpy.uarray(psf_final_sum,psferr)
+contrast_flux = simplex/psf
+contrast_flux_mcmc = mcmcf/psf
+spect = contrast_flux*qzcar
+spect_mcmc = contrast_flux_mcmc*qzcar
+# dmag_mcmc_K1 = -2.5*unumpy.log10(mc_f_K1[2:]/central_star_flux_K1)
+
+plt.figure(figsize=(12, 9))
+#plt.title('Aperture Photometry IFS')
+
+# ax.get_xaxis().tick_bottom()
+# ax.get_yaxis().tick_left()
+# plt.ylim(0, 1.1*max(simplex_flux))
+plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.5)
+#plt.grid(True, 'major', 'x', ls='--', lw=.5, c='k', alpha=.3)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.ylabel("Flux", fontsize=20)
+plt.xlabel('Wavelength [$\mathring{A}$]', fontsize=20)
+plt.plot(wl*1e4, unumpy.nominal_values(spect),lw=2.8,label='Simplex')
+plt.plot(wl*1e4, unumpy.nominal_values(spect_mcmc),lw=2.8,label='MCMC')
+plt.plot(wl_lss*1e4, lss*10,lw=2.8,label='IRDIS-LSS')
+# plt.fill_between(wl*1e4, unumpy.nominal_values(spect) - unumpy.std_devs(spect),unumpy.nominal_values(spect) + unumpy.std_devs(spect), color="lightsteelblue")
+plt.legend()
+plt.show()

@@ -1,9 +1,8 @@
 ############################
 # Date: 07/08/2019
 # Title: Running script for SHIPS for IFS data
-# Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP and pyKLIP are used.
+# Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP is used.
 # VIP version: 0.9.11 (Rainot edit.)
-# pyKLIP version: 1.1 NOT IMPLEMENTED YET
 # Python version: 3 ONLY
 ############################
 
@@ -13,19 +12,30 @@
 cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/corrected_psf.fits'
-psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-# wavelength_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-# cube_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-# angles_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-# psf_filepath = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/psf_corrected_final.fits'
+# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
+# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
+# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-comp_pos = (112.,54.) # Companion position in pixels from the center of the frame (X,Y)
-psf_pos = (32, 33) # PSF position in pixels (X,Y)
-radial_dist = 97. # Radial distance of companion in pixels
+
+# HD93403
+# comp_pos = (128.,168.) # Companion position in pixels from the center of the frame (X,Y)
+# psf_pos = (32, 32) # PSF position in pixels (X,Y)
+# frame_cent = (145,145) # Center of the frame
+# radial_dist = 28.6 # Radial distance of companion in pixels
+# position_angle = 159.  # Position angle of companion in degrees
+# noise_aperture_pos_comp = (23,33) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+# noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+# size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
+
+comp_pos = (110.,54.) # Companion position in pixels from the center of the frame (X,Y)
+psf_pos = (32, 32) # PSF position in pixels (X,Y)
+frame_cent = (145,145) # Center of the frame
+radial_dist = 98 # Radial distance of companion in pixels
 position_angle = 159.  # Position angle of companion in degrees
-noise_aperture_pos_comp = (92,102) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+noise_aperture_pos_comp = (92,104) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
@@ -39,9 +49,9 @@ see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
 
 ## PCA
-ncomp_pca = 0 # Number of principal components for PCA
+ncomp_pca = 1 # Number of principal components for PCA
 opti_pca = False # Optimise the number of PCA components?
-source_pca = (82.,116.) # Source where to optimise the PCA
+source_pca = (28.,159.) # Source where to optimise the PCA
 
 ## SNR maps
 snr_maps = False # Would you like to make and save an SNR map to disk?
@@ -63,7 +73,7 @@ n_branches = 1 # Number of branches for contrast curves
 ## Photometric errors of PSF
 psf_errors = True # Compute the photometric errors of the central star's PSF
 psf_errors_save = True # Save the errors to a file?
-psf_errors_file = "/Users/alan/Documents/PhD/Data/IFS/QZCardone/PSF_errors.txt"
+psf_errors_file = "/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/PSF_errors.txt"
 
 ## Aperture Photometry
 plot_aper = False # Plot the aperture photometry of the detected companion?
@@ -73,7 +83,7 @@ extract_spec = False # Will start the simplex Nelder-Mead optimisation for spect
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
 save_spec = False # Save the spectrum to ascii file
-sspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
+sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/VIP_simplex.txt' # Filepath to save the Simplex spectrum
 plot_sspec = False # Plot the resulting spectrum?
 
 ## Spectrum extraction with MCMC
@@ -97,7 +107,7 @@ dist_fast = 100. # Distance to consider for the flux of the calibrated spectrum 
 calib_spec = False # Do you wish to calibrate the spectrum of the companion?
 save_calib_spec = False # Would you like to save the calibrated spectrum & associated error?
 calib_star_spec_path = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/fastwind_model.txt' # Path to calibrated spectrum of central star
-sspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/QZCardone/VIP_simplex.txt' # Path to spectrum file
+# sspec_file = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/VIP_simplex.txt' # Path to spectrum file
 cspec_file = '/home/alan/data/Backup_macbook/SPHERE/IFS/HD93403/VIP_calib_spectra.txt' # Path to calibrated spectrum
 
 ## Magnitude contrasts
@@ -135,10 +145,12 @@ from photutils import CircularAperture
 from photutils import CircularAnnulus
 import matplotlib.pyplot as plt
 import glob
-#import pyklip.instruments.SPHERE as SPHERE
 import math as mh
-#import pyklip.parallelized as parallelized
 from scipy.integrate import quad, dblquad
+### Error libraries
+from uncertainties import ufloat
+from uncertainties.umath import *
+from uncertainties import unumpy
 
 ## Define constants
 c = 299792458. # Speed of light
@@ -154,7 +166,7 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-psf = np.median(psf, axis=1) # Take the median of all PSFs
+#psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
@@ -165,7 +177,7 @@ if see_cube == True:
     ds9.display(cube[0,0])
 
 ## Get FWHM of images & normalised PSF
-psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=(32, 32), verbose=True, force=True) # Resize the PSF
+psf_med = vip_hci.preproc.cosmetics.cube_crop_frames(psf, size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
 psf_norm, maxflux, fwhm = vip_hci.metrics.normalize_psf(psf_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # maxflux is a dummy variable
 
 ### Plot it
@@ -221,7 +233,7 @@ psf_final_sum = np.zeros_like(wl) #PSF photometry
 final_sum = np.zeros_like(wl) #Companion photometry
 
 ### Apertures
-aper_noise_comp = photutils.CircularAnnulus((145,145),noise_aperture_pos_comp[0],noise_aperture_pos_comp[1])
+aper_noise_comp = photutils.CircularAnnulus(frame_cent,noise_aperture_pos_comp[0],noise_aperture_pos_comp[1])
 aper_noise_psf = photutils.CircularAnnulus(psf_pos,noise_aperture_pos_psf[0],noise_aperture_pos_psf[1])
 
 ### Aperture photometry
@@ -237,7 +249,8 @@ for i in range(0,wl.shape[0]):
     phot_psf_noise = photutils.aperture_photometry(psf[i], aper_noise_psf)
     psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
     psf_bkg_sum = psf_bkg_mean * aper_psf.area()
-    psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
+    # psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
+    psf_final_sum[i] = maxflux[i] - psf_bkg_sum
     ### Companion
     phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
     bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
@@ -262,17 +275,16 @@ if contrast_curves == True:
     contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
-
 ## PSF error calculation
 if psf_errors == True:
     psferr = vip_hci.fits.open_fits(psf_filepath) # Open the raw PSFs
-    stddev = np.zeros_like(wl) # Create an array for the stored standard deviation
+    stddev_psf = np.zeros_like(wl) # Create an array for the stored standard deviation
     for i in range(len(wl)): # Loop over the wavelengths
-        psferr_med = vip_hci.preproc.cosmetics.cube_crop_frames(psferr[i], size_psf, xy=(32, 32), verbose=True, force=True) # Resize the PSF
+        psferr_med = vip_hci.preproc.cosmetics.cube_crop_frames(psferr[i], size_psf, xy=psf_pos, verbose=True, force=True) # Resize the PSF
         psf_norm_err, maxflux_err, fwhm_err = vip_hci.metrics.normalize_psf(psferr_med, fwhm='fit',size=None, threshold=None,mask_core=None, model='gauss',imlib='opencv',interpolation='lanczos4',force_odd=True,full_output=True,verbose=False) # Measure the maximum flux for each PSF
-        stddev[i] = np.std(maxflux_err,ddof=1) # Calculate the standard deviation for the PSFs
+        stddev_psf[i] = np.std(maxflux_err,ddof=1) # Calculate the standard deviation for the PSFs
     if psf_errors_save: # Save the error
-        np.savetxt(stddev, psf_errors_file, delimiter='   ') # Saves to file
+        np.savetxt(psf_errors_file,stddev_psf,delimiter='   ') # Saves to file
 
 # Spectrum extraction with NM
 if extract_spec == True:
@@ -280,18 +292,16 @@ if extract_spec == True:
     ## Define some parameters
     comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
     f_guess_pl = max(final_sum) # Flux first guess as the maximum value of the flux
-    f_range = np.linspace(0.*f_guess_pl,1.5*f_guess_pl, 60)
+    f_range = np.linspace(0.*f_guess_pl,10*f_guess_pl,100)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
     simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
-    simplex_guess = np.zeros((39,3)) # Set the simplex variable: r, PA, flux
+    simplex_guess = np.zeros((len(wl),3)) # Set the simplex variable: r, PA, flux
 
     ## Start Simplex
     for i in range(0,len(wl)):
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
         simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range,simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False)
         #simplex_guess[i] = vip_hci.negfc.simplex_optim.firstguess(cube[i], -angs, psf_norm[i], ncomp=1, plsc=0.0074,fwhm=fwhm[i], annulus_width=3, aperture_radius=2, planets_xy_coord=comp_xycoord, cube_ref=None,svd_mode='lapack',f_range=f_range, simplex=True,fmerit='sum',scaling=None, simplex_options=simplex_options,collapse='median',verbose=False)
-
-        print(simplex_guess[i])
 
     ## Save the spectrum
     if save_spec == True:
@@ -300,6 +310,22 @@ if extract_spec == True:
 
 # Spectrum extraction with MCMC
 if extract_mcmc == True:
+
+    ## If the spectrum extraction was initiated previously, we do not need to read the resulting file. In case it was not, we read the file specified
+    if extract_spec == False:
+        ## Read the file containing the simplex minimization values and save the values to an array
+        simplex_guess = np.zeros((len(wl),3)) # Simplex array
+        j = 0
+        with open(sspec_file) as f:
+            for line in f:
+                line = line.strip()
+                columns = line.split()
+                simplex_guess[j,0] = float(columns[0]) # Radius
+                simplex_guess[j,1] = float(columns[1]) # PA
+                simplex_guess[j,2] = float(columns[2]) # Flux
+                j+=1
+        f.close
+
     instru= 'IFS36059' # Define instrument parameters
     fig_merit='sum' # Summation figure of merit
     outpath = mcmc_path.format(source) # Path to save MCMC files
@@ -461,6 +487,27 @@ if calib_spec == True:
 # Magnitude contrasts
 if mag_contr == True:
 
+    ## If the spectrum extraction was initiated previously, we do not need to read the resulting file. In case it was not, we read the file specified
+    if extract_spec == False:
+        ## Read the file containing the simplex minimization values and save the values to an array
+        simplex_flux = np.zeros_like(wl) # Simplex array
+        j = 0
+        with open(sspec_file) as f:
+            for line in f:
+                line = line.strip()
+                columns = line.split()
+                simplex_flux[j] = float(columns[2])
+                j+=1
+        f.close
+    ## Otherwise, carry on
+    else:
+        for i in range(len(wl)):
+            simplex_flux[i] = simplex_guess[i][2]
+
+    ## Compute the contrast spectrum
+    contr_spectra = simplex_flux / psf_final_sum
+    #contr_spectra_err
+
     ## Define the Y, J and H bands
     Y = wl[0:14]
     J = wl[14:25]
@@ -470,32 +517,32 @@ if mag_contr == True:
     contr_spectra_Y = contr_spectra[0:14]
     contr_spectra_J = contr_spectra[14:25]
     contr_spectra_H = contr_spectra[25:39]
-    contr_err_Y = contr_err[0:14]
-    contr_err_J = contr_err[14:25]
-    contr_err_H = contr_err[25:39]
+    # contr_err_Y = contr_err[0:14]
+    # contr_err_J = contr_err[14:25]
+    # contr_err_H = contr_err[25:39]
 
     ## Define some stored parameters
-    dmag_Y = np.zeros_like(contr_spec_Y)
-    dmag_J = np.zeros_like(contr_spec_J)
-    dmag_H = np.zeros_like(contr_spec_H)
-    dmag_Y_err = np.zeros_like(contr_spec_Y)
-    dmag_J_err = np.zeros_like(contr_spec_J)
-    dmag_H_err = np.zeros_like(contr_spec_H)
+    dmag_Y = np.zeros_like(contr_spectra_Y)
+    dmag_J = np.zeros_like(contr_spectra_J)
+    dmag_H = np.zeros_like(contr_spectra_H)
+    # dmag_Y_err = np.zeros_like(contr_spectra_Y)
+    # dmag_J_err = np.zeros_like(contr_spectra_J)
+    # dmag_H_err = np.zeros_like(contr_spectra_H)
 
-    for i in range(len(contr_spec_Y)):
-        dmag_Y[i] = -2.5*mh.log10(contr_spec_Y[i])
-        dmag_H[i] = -2.5*mh.log10(contr_spec_H[i])
-        dmag_Y_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_Y[i]/contr_spec_Y[i]))
-        dmag_H_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_H[i]/contr_spec_H[i]))
+    for i in range(len(contr_spectra_Y)):
+        dmag_Y[i] = -2.5*mh.log10(contr_spectra_Y[i])
+        dmag_H[i] = -2.5*mh.log10(contr_spectra_H[i])
+        # dmag_Y_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_Y[i]/contr_spectra_Y[i]))
+        # dmag_H_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_H[i]/contr_spectra_H[i]))
 
-    for i in range(len(contr_spec_J)):
-        dmag_J[i] = -2.5*mh.log10(contr_spec_J[i])
-        dmag_J_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_J[i]/contr_spec_J[i]))
+    for i in range(len(contr_spectra_J)):
+        dmag_J[i] = -2.5*mh.log10(contr_spectra_J[i])
+        # dmag_J_err[i] = np.abs((1/mh.log(10)) * -2.5 * (contr_err_J[i]/contr_spectra_J[i]))
 
     if print_mag_contr == True:
-        print("Y contrast magnitude: " + dmag_Y + " +/- " + dmag_Y_err)
-        print("J contrast magnitude: " + dmag_J + " +/- " + dmag_J_err)
-        print("H contrast magnitude: " + dmag_H + " +/- " + dmag_H_err)
+        print("Y contrast magnitude: ", dmag_Y)# + " +/- " + dmag_Y_err)
+        print("J contrast magnitude: ", dmag_J)# + " +/- " + dmag_J_err)
+        print("H contrast magnitude: ", dmag_H)# + " +/- " + dmag_H_err)
 
 # Absolute magnitudes
 if abs_mag == True:
@@ -549,9 +596,7 @@ if abs_mag == True:
         print("J absolute magnitude: " + M_comp[1] + " +/- " + M_comp_err[1])
         print("H absolute magnitude: " + M_comp[2] + " +/- " + M_comp_err[2])
 
-
 # Plotting
-
 ## Aperture Photometry
 if plot_aper == True:
     plt.figure(figsize=(12, 9))
