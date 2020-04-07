@@ -13,6 +13,8 @@ cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortfra
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/psf_corrected_final.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
+# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_convert_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat'
 # wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 # cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
 # angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
@@ -21,12 +23,12 @@ psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/psf_correcte
 ## Photometry
 
 # HD93403
-# comp_pos = (128.,168.) # Companion position in pixels from the center of the frame (X,Y)
+# comp_pos = (127.,168.) # Companion position in pixels from the center of the frame (X,Y)
 # psf_pos = (32, 32) # PSF position in pixels (X,Y)
 # frame_cent = (145,145) # Center of the frame
 # radial_dist = 28.6 # Radial distance of companion in pixels
 # position_angle = 159.  # Position angle of companion in degrees
-# noise_aperture_pos_comp = (23,33) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
+# noise_aperture_pos_comp = (24,34) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 # noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 # size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
@@ -36,7 +38,7 @@ frame_cent = (145,145) # Center of the frame
 radial_dist = 98 # Radial distance of companion in pixels
 position_angle = 159.  # Position angle of companion in degrees
 noise_aperture_pos_comp = (92,104) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
-noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
+noise_aperture_pos_psf = (13,23) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
 size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
 
 ## Computing power
@@ -71,8 +73,8 @@ contrast_curves = False # True or False !! computationally intensive !!
 n_branches = 1 # Number of branches for contrast curves
 
 ## Photometric errors of PSF
-psf_errors = True # Compute the photometric errors of the central star's PSF
-psf_errors_save = True # Save the errors to a file?
+psf_errors = False # Compute the photometric errors of the central star's PSF
+psf_errors_save = False # Save the errors to a file?
 psf_errors_file = "/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/PSF_errors.txt"
 
 ## Aperture Photometry
@@ -166,7 +168,7 @@ angs = vip_hci.fits.open_fits(angles_filepath)
 psf = vip_hci.fits.open_fits(psf_filepath)
 
 ## Define some Parameters
-#psf = np.median(psf, axis=1) # Take the median of all PSFs
+# psf = np.median(psf, axis=1) # Take the median of all PSFs
 psf_scaled = np.zeros_like(psf) # The psf will need to be scaled
 flevel = np.zeros_like(cube[:,0,0,0]) # Flux level for the companion
 flevel = np.array(flevel) # Redefinition - why?
@@ -239,8 +241,8 @@ aper_noise_psf = photutils.CircularAnnulus(psf_pos,noise_aperture_pos_psf[0],noi
 ### Aperture photometry
 for i in range(0,wl.shape[0]):
     ### Apertures dependent on channel
-    aper_comp = photutils.CircularAperture(comp_pos, 1./2*fwhm[i])
-    aper_psf = photutils.CircularAperture(psf_pos, 1./2*fwhm[i])
+    aper_comp = photutils.CircularAperture(comp_pos, 0.5*fwhm[i])
+    aper_psf = photutils.CircularAperture(psf_pos, 0.5*fwhm[i])
     ### Noise
     phot_noise = photutils.aperture_photometry(cube_wl_coll[i], aper_noise_comp)
     noise_phot[i] = np.array(phot_noise['aperture_sum'])
@@ -250,12 +252,12 @@ for i in range(0,wl.shape[0]):
     psf_bkg_mean = phot_psf_noise['aperture_sum'] / aper_noise_psf.area()
     psf_bkg_sum = psf_bkg_mean * aper_psf.area()
     # psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
-    psf_final_sum[i] = maxflux[i] - psf_bkg_sum
+    psf_final_sum[i] = phot_psf['aperture_sum'] - psf_bkg_sum
     ### Companion
     phot = photutils.aperture_photometry(cube_wl_coll[i], aper_comp)
     bkg_mean = (phot_noise['aperture_sum']-phot['aperture_sum']) / (aper_noise_comp.area()-aper_comp.area())
     bkg_sum = bkg_mean * aper_comp.area()
-    final_sum[i] = phot['aperture_sum'] - bkg_sum
+    final_sum[i] = maxflux[i] - bkg_sum
 
 ### Scaling the PSF for normalisation -- SHOULD I JUST TAKE PSF_NORM INSTEAD?
 psf_scaled = np.zeros_like(psf)
@@ -292,7 +294,7 @@ if extract_spec == True:
     ## Define some parameters
     comp_xycoord = [(comp_pos[0],comp_pos[1])] # Companion coords
     f_guess_pl = max(final_sum) # Flux first guess as the maximum value of the flux
-    f_range = np.linspace(0.*f_guess_pl,10*f_guess_pl,100)
+    f_range = np.linspace(0.*f_guess_pl,3.*f_guess_pl,100)
     p_in = np.array([radial_dist,PA]) # Regroup companion positions
     simplex_options = {'xtol':1e-2, 'maxiter':500, 'maxfev':1000} # Set the simplex options
     simplex_guess = np.zeros((len(wl),3)) # Set the simplex variable: r, PA, flux
@@ -302,7 +304,7 @@ if extract_spec == True:
         print("Wavelength index: ", i + 1) # 39 wavelengths for IFS
         simplex_guess[i] = vip_hci.negfc.firstguess(cube[i],-angs,psf_norm[i],ncomp=ncomp_pca,plsc=pxscale,planets_xy_coord=comp_xycoord,fwhm=fwhm[i],annulus_width=ann_width,aperture_radius=aper_radius,simplex_options=simplex_options,f_range=f_range,simplex=True,fmerit='sum',collapse='median',svd_mode='lapack',scaling=None,verbose=False,plot=False,save=False)
         #simplex_guess[i] = vip_hci.negfc.simplex_optim.firstguess(cube[i], -angs, psf_norm[i], ncomp=1, plsc=0.0074,fwhm=fwhm[i], annulus_width=3, aperture_radius=2, planets_xy_coord=comp_xycoord, cube_ref=None,svd_mode='lapack',f_range=f_range, simplex=True,fmerit='sum',scaling=None, simplex_options=simplex_options,collapse='median',verbose=False)
-
+        print(simplex_guess[i])
     ## Save the spectrum
     if save_spec == True:
         np.savetxt(sspec_file, simplex_guess, delimiter='   ') # Saves to file
