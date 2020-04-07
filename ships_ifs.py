@@ -1,5 +1,5 @@
 ############################
-# Date: 07/08/2019
+# Date: 07/04/2020
 # Title: Running script for SHIPS for IFS data
 # Description: Use this script to run SHIPS for IFS data. In this script you'll find all the necessary parameters to run SHIPS. ONLY SPHERE-DC DATA FOR NOW. VIP is used.
 # VIP version: 0.9.11 (Rainot edit.)
