@@ -1,4 +1,4 @@
-SHIPS - SPHERE High-contrast Imaging Pipeline for massive Stars (Under Active Development)
+SHIPS - SPHERE High-contrast Imaging Pipeline for massive Stars
 =====================================
 
 Introduction
@@ -14,7 +14,7 @@ VIP is a package/pipeline for angular, reference star and spectral
 differential imaging for exoplanet/disk detection through high-contrast imaging.
 VIP is being developed in Python 3+.
 
-
+Currently at version 1.0
 
 Documentation
 -------------
