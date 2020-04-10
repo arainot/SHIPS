@@ -13,25 +13,8 @@ cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortfra
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/psf_corrected_final.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/QZCardone/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93129A/ifs_convert_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_LAMBDA_INFO-lam.fits'
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_REDUCED_SPECTRAL_MASTER_CUBE_SORTED-center_im_sorted.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PARA_ROTATION_CUBE_SORTED-rotnth_sorted.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/ifs_sortframes_dc-IFS_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-
-# HD93403
-# comp_pos = (127.,168.) # Companion position in pixels from the center of the frame (X,Y)
-# psf_pos = (32, 32) # PSF position in pixels (X,Y)
-# frame_cent = (145,145) # Center of the frame
-# radial_dist = 28.6 # Radial distance of companion in pixels
-# position_angle = 159.  # Position angle of companion in degrees
-# noise_aperture_pos_comp = (24,34) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
-# noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
-# size_psf = 31 # What size PSF would you like to use? ODD VALUE ONLY!!
-
 comp_pos = (110.,54.) # Companion position in pixels from the center of the frame (X,Y)
 psf_pos = (32, 32) # PSF position in pixels (X,Y)
 frame_cent = (145,145) # Center of the frame

@@ -13,19 +13,11 @@ cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_d
 wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
 angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
 psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
-# wavelength_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_LAMBDA_INFO-lam.fits'
-# cube_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_REDUCED_MASTER_CUBE-center_im.fits'
-# angles_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_dc-IRD_SCIENCE_PARA_ROTATION_CUBE-rotnth.fits'
-# psf_filepath = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/HD93403/ird_convert_recenter_dc5-IRD_SCIENCE_PSF_MASTER_CUBE-median_unsat.fits'
 
 ## Photometry
-# comp_pos = ([513,609],[418,358],[286,590],[596,743],[620,258],[735,754],[422,881],[857,763],[84,434],[65,588],[535,29]) # Companion position in pixels (X,Y)
-comp_pos = ([490.,455.],[559.,579.],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[517,241],[227,569],[344,775],[847,491],[899,507],[72,533],[819,180],[451.,60.],[49.,396.],[732.,44.],[647.,15.])
-# comp_pos = ([501,525],[490,455])
-# Companion position in pixels (X,Y)
+comp_pos = ([490.,455.],[559.,579.],[688,630],[570,702],[311,486],[696,419],[296,472],[654,707],[517,241],[227,569],[344,775],[847,491],[899,507],[72,533],[819,180],[451.,60.],[49.,396.],[732.,44.],[647.,15.])# Companion position in pixels (X,Y)
 psf_pos = (32, 32) # PSF position in pixels (X,Y)
 radial_dist = [98.0204060387,179.047479737,238.465930481,247.080958392,275.481396831,330.492057393,380.553544196,428.042054009,433.887082085,452.598055674,482.597140481]# Radial distance of companion in pixels
-radial_dist =[17.029386365926403,98.0204060387]
 position_angle = [295.9,311.8] # Position angle of companion in degrees
 noise_aperture_pos_comp = (512,512) # Position in pixels of the circular annulus aperture for noise measurement in the case of the companion
 noise_aperture_pos_psf = (12,22) # Position in pixels of the circular annulus aperture for noise measurement in the case of the PSF
@@ -38,7 +30,7 @@ see_cube = False # Original cube
 see_collapsed_cube = False # Collapsed cube
 see_psf_norm = False # Normalised PSF
 see_cube_centre = False # Check if the image is centered correctly
-size_psf = 21
+size_psf = 31
 
 ## PCA
 ncomp_pca = 1 # Number of principal components for PCA
@@ -67,14 +59,14 @@ psf_errors_save = False # Save the errors to a file?
 psf_errors_file = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/PSF_errors.txt' # Filepath to save the PSF errors
 
 ## Spectrum extraction with PSF fitting
-extract_psf_fitting = True # Will start the PSF fitting for spectrum extraction
-psf_fitting_contr = True # Would you like to have the full output of PSF fitting = plots for every sources + contrast magnitudes?
-save_psf_fitting = True # Save the spectrum to ascii file
+extract_psf_fitting = False # Will start the PSF fitting for spectrum extraction
+psf_fitting_contr = False # Would you like to have the full output of PSF fitting = plots for every sources + contrast magnitudes?
+save_psf_fitting = False # Save the spectrum to ascii file
 psff_file_K1 = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/psf_fitting_K1.txt' # Filepath to save the Simplex spectrum for the K1 band
 psff_file_K2 = '/Users/alan/Documents/PhD/Data/SPHERE/IRDIS/QZCar/psf_fitting_K2.txt' # Filepath to save the Simplex spectrum for the K2 band
 
 ## Spectrum extraction with Simplex Nelder-Mead optimisation
-extract_spec = False # Will start the simplex Nelder-Mead optimisation for spectrum extraction
+extract_spec = True # Will start the simplex Nelder-Mead optimisation for spectrum extraction
 ann_width = 3 # Annulus width of Simplex
 aper_radius = 3 # Aperture Radius of PCA
 save_spec = False # Save the spectrum to ascii file
@@ -292,6 +284,7 @@ if extract_psf_fitting == True:
 # Save the spectrum and positions
 if save_psf_fitting == True:
 
+    ## Enumarate the stars
     star_ids = np.linspace(1,len(comp_pos),len(comp_pos))
 
     ## Full output
@@ -408,7 +401,7 @@ if extract_spec == True:
     simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
     simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
     ## Start Simplex
-    for i in range(0,len(f_range_K2)-1):
+    for i in range(2,3):
         print("Companion index: ", i + 1) # Companions for IRDIS
         ### K1
         comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords
