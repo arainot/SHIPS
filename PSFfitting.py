@@ -182,7 +182,7 @@ def psf_fitting(array, input_psf, fwhm, comp_pos, psf_pos, full_output=False):
     # definitions for the photometry
     ############################################################################
     aper_rad = 1.*fwhm
-    fshape = round_down_to_odd(len(input_psf))
+    fshape = int(round_down_to_odd(len(input_psf[0])))
     phot = photometry.BasicPSFPhotometry(group_maker=DAOGroup(15.),
                                          psf_model=epsf,
                                          bkg_estimator=None,

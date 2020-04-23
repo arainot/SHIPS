@@ -272,7 +272,8 @@ if psf_errors == True:
         stddev_psf[i] = np.std(maxflux_err,ddof=1) # Calculate the standard deviation for the PSFs
     if psf_errors_save: # Save the error
         np.savetxt(psf_errors_file,stddev_psf,delimiter='   ') # Saves to file
-
+        print("PSF errors saved to file!")
+        
 # Spectrum extraction with NM
 if extract_spec == True:
 
