@@ -405,7 +405,7 @@ if extract_spec == True:
     simplex_guess_K1 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K1
     simplex_guess_K2 = np.zeros((len(radial_dist),3)) # Set the simplex variable: r, PA, flux for every companion - K2
     ## Start Simplex
-    for i in range(2,3):
+    for i in range(len(wl)):
         print("Companion index: ", i + 1) # Companions for IRDIS
         ### K1
         comp_xycoord = [[comp_pos[i][0],comp_pos[i][1]]] # Companion coords

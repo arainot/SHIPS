@@ -284,7 +284,7 @@ def psf_fitting(array, input_psf, fwhm, comp_pos, psf_pos, full_output=False):
     cerr_comp = np.zeros_like(xpos) # Contrast magnitude errors
 
     # LOOP OVER STARS
-    for i in range(len(xpos)-1):
+    for i in range(len(xpos)):
         star = starlist[i]
         x_pos, y_pos = [], []
         x_pos.append(star.xcoord)
