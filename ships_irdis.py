@@ -210,8 +210,8 @@ if see_collapsed_cube == True:
 ### Define photometry
 noise_phot = np.zeros_like(wl) #Noise photometry
 psf_final_sum = np.zeros_like(wl) #PSF photometry
-final_sum_K1 = np.zeros_like(radial_dist) #Companion photometry in the K1 band
-final_sum_K2 = np.zeros_like(radial_dist) #Companion photometry in the K2 band
+final_sum_K1 = np.zeros(len(comp_pos)) #Companion photometry in the K1 band
+final_sum_K2 = np.zeros(len(comp_pos)) #Companion photometry in the K2 band
 
 ### Apertures
 aper_noise_psf = photutils.CircularAnnulus(psf_pos,noise_aperture_pos_psf[0],noise_aperture_pos_psf[1])
