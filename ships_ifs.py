@@ -53,6 +53,7 @@ detect_sigma = 5 # What sigma limit would you like for the detection?
 
 ## Contrast curves
 contrast_curves = False # True or False !! computationally intensive !!
+cube_free_file = "/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/cube_free.fits" # Filepath to the cube free of sources/companions
 n_branches = 1 # Number of branches for contrast curves
 
 ## Photometric errors of PSF
@@ -256,10 +257,9 @@ if snr_maps == True:
 
 ## Contrast curve
 if contrast_curves == True:
-    cube_negfc = vip_hci.metrics.cube_inject_companions(cube,psf_norm,-angs,flevel=-final_sum,plsc=pxscale,rad_dists=[radial_dist],theta=PA) # Remove companion using NEGFC technique
-    print("Companion removed")
+    cube_negfc = vip_hci.fits.open_fits(cube_free_file)
     print("Computing contrast curve...")
-    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,psf_final_sum,vip_hci.pca.pca,nbranch=n_branches,
+    contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,maxflux,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
 
 ## PSF error calculation
@@ -273,7 +273,7 @@ if psf_errors == True:
     if psf_errors_save: # Save the error
         np.savetxt(psf_errors_file,stddev_psf,delimiter='   ') # Saves to file
         print("PSF errors saved to file!")
-        
+
 # Spectrum extraction with NM
 if extract_spec == True:
 
