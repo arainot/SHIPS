@@ -55,6 +55,8 @@ detect_sigma = 5 # What sigma limit would you like for the detection?
 contrast_curves = False # True or False !! computationally intensive !!
 cube_free_file = "/Users/alan/Documents/PhD/Data/SPHERE/IFS/HD93403/cube_free.fits" # Filepath to the cube free of sources/companions
 n_branches = 1 # Number of branches for contrast curves
+save_contrcurve = True # Save the contrast curve values to a file?
+contrcurve_savefile = '/Users/alan/Documents/PhD/Data/SPHERE/IFS/CPD-582611/contrast_curve_IFS.txt'# Filepath to save the contrast curve distance and delta_mag
 
 ## Photometric errors of PSF
 psf_errors = False # Compute the photometric errors of the central star's PSF
@@ -261,6 +263,15 @@ if contrast_curves == True:
     print("Computing contrast curve...")
     contrcurve = vip_hci.metrics.contrast_curve(cube_negfc,-angs,psf_norm,np.average(fwhm),pxscale,maxflux,vip_hci.pca.pca,nbranch=n_branches,
               dpi=300, student=False, debug=True ,plot=True, verbose=True, full_output=True, ncomp=ncomp_pca, scale_list=wl)
+
+    if save_contrcurve == True:
+        contr_dist = contrcurve[0]['distance_arcsec']
+        contr_mag = -2.5*np.log10(contrcurve[0]['sensitivity_gaussian'])
+        contr_curve = np.zeros((len(contr_mag),2))
+        contr_curve[:,0] = contr_dist
+        contr_curve[:,1] = contr_mag
+        np.savetxt(contrcurve_savefile,contr_curve, delimiter='   ') # Saves to file)
+        print("Contrast curve saved!")
 
 ## PSF error calculation
 if psf_errors == True:
