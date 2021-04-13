@@ -17,4 +17,4 @@ VIP is being developed in Python 3+.
 
 Documentation
 -------------
-Documentation for VIP can be found in http://vip.readthedocs.io/.
+Documentation for VIP can be found in https://vip.readthedocs.io/.
